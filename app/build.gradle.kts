@@ -36,6 +36,9 @@ android {
         if (project.hasProperty("RELEASE_STORE_FILE")) {
             create("myConfig") {
                 storeFile = file(project.property("RELEASE_STORE_FILE") as String)
+                if (project.hasProperty("RELEASE_STORE_TYPE")) {
+                    storeType = project.property("RELEASE_STORE_TYPE") as String
+                }
                 storePassword = project.property("RELEASE_STORE_PASSWORD") as String
                 keyAlias = project.property("RELEASE_KEY_ALIAS") as String
                 keyPassword = project.property("RELEASE_KEY_PASSWORD") as String

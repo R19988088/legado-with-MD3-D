@@ -153,40 +153,16 @@ jobs:
           echo "">$GITHUB_WORKSPACE/app/src/main/assets/18PlusList.txt
       - name: Configure Fixed Release Signing
         shell: bash
-        env:
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ -f "$GITHUB_WORKSPACE/.github/workflows/legado.jks" ] &&
-            [ -n "$KEYSTORE_PASSWORD" ] &&
-            [ -n "$KEY_ALIAS" ] &&
-            [ -n "$KEY_PASSWORD" ]; then
-            echo "使用仓库内固定签名 legado.jks"
-            {
-              echo ""
-              echo "RELEASE_STORE_FILE=.github/workflows/legado.jks"
-              echo "RELEASE_STORE_PASSWORD=$KEYSTORE_PASSWORD"
-              echo "RELEASE_KEY_ALIAS=$KEY_ALIAS"
-              echo "RELEASE_KEY_PASSWORD=$KEY_PASSWORD"
-            } >> "$GITHUB_WORKSPACE/gradle.properties"
-          elif [ -n "$SIGNING_KEY" ] &&
-            [ -n "$KEYSTORE_PASSWORD" ] &&
-            [ -n "$KEY_ALIAS" ] &&
-            [ -n "$KEY_PASSWORD" ]; then
-            echo "仓库内固定签名不可用，回退到 secrets.SIGNING_KEY"
-            echo "$SIGNING_KEY" | base64 -d >"$GITHUB_WORKSPACE/app/my-release-key.jks"
-            {
-              echo ""
-              echo "RELEASE_STORE_FILE=app/my-release-key.jks"
-              echo "RELEASE_STORE_PASSWORD=$KEYSTORE_PASSWORD"
-              echo "RELEASE_KEY_ALIAS=$KEY_ALIAS"
-              echo "RELEASE_KEY_PASSWORD=$KEY_PASSWORD"
-            } >> "$GITHUB_WORKSPACE/gradle.properties"
-          else
-            echo "签名 secrets 不完整，跳过签名配置"
-          fi
+          echo "使用仓库内固定签名 app/legado-fixed-release.p12"
+          {
+            echo ""
+            echo "RELEASE_STORE_FILE=legado-fixed-release.p12"
+            echo "RELEASE_STORE_TYPE=pkcs12"
+            echo "RELEASE_STORE_PASSWORD=legado-md3d-fixed-2026"
+            echo "RELEASE_KEY_ALIAS=legado-fixed"
+            echo "RELEASE_KEY_PASSWORD=legado-md3d-fixed-2026"
+          } >> "$GITHUB_WORKSPACE/gradle.properties"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
