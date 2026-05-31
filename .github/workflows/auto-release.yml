@@ -63,7 +63,11 @@ jobs:
           PATCH=$(cat "$PROPERTIES_FILE" | grep 'VERSION_PATCH' | cut -d'=' -f2 | tr -d '[:space:]')
           RELEASE_FLAG=$(cat "$PROPERTIES_FILE" | grep 'VERSION_SUFFIX' | cut -d'=' -f2 | tr -d '[:space:]')
           
-          CURRENT_VERSION="$MAJOR.$MINOR.$PATCH"
+          if [ -z "$PATCH" ]; then
+            CURRENT_VERSION="$MAJOR.$MINOR"
+          else
+            CURRENT_VERSION="$MAJOR.$MINOR.$PATCH"
+          fi
           NEW_BUILD_NUM=0
           VERSION_SUFFIX_NAME=""
           IS_RELEASE="false" # 默认为 Pre-release
@@ -243,7 +247,7 @@ jobs:
     if: |
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
-      github.actor == 'HapeLee' &&
+      github.repository_owner == 'R19988088' &&
       (needs.prepare.outputs.build_number > 0 || needs.prepare.outputs.is_release == 'true') &&
       success()
     runs-on: ubuntu-latest

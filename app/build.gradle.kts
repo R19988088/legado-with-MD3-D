@@ -24,9 +24,13 @@ val versionProps = Properties().apply {
 
 val versionMajor = versionProps["VERSION_MAJOR"]?.toString()?.toInt() ?: 0
 val versionMinor = versionProps["VERSION_MINOR"]?.toString()?.toInt() ?: 0
-val versionPatch = versionProps["VERSION_PATCH"]?.toString()?.toInt() ?: 0
+val versionPatch = versionProps["VERSION_PATCH"]?.toString()?.toIntOrNull() ?: 0
 val appName = "legado"
-val projectVersionName = "$versionMajor.$versionMinor.$versionPatch"
+val projectVersionName = if (versionProps["VERSION_PATCH"]?.toString().isNullOrBlank()) {
+    "$versionMajor.${versionProps["VERSION_MINOR"]}"
+} else {
+    "$versionMajor.$versionMinor.$versionPatch"
+}
 
 android {
     compileSdk = 37
