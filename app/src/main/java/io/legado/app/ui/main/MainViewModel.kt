@@ -143,8 +143,8 @@ data class MainUiState(
     val destinations: ImmutableList<MainDestination> = MainDestination.mainDestinations,
     val defaultHomePage: String = "bookshelf",
     val showBottomView: Boolean = true,
-    val useFloatingBottomBar: Boolean = false,
-    val useFloatingBottomBarLiquidGlass: Boolean = false,
+    val useFloatingBottomBar: Boolean = true,
+    val useFloatingBottomBarLiquidGlass: Boolean = true,
     val labelVisibilityMode: String = "auto",
     val navExtended: Boolean = false
 )
@@ -168,10 +168,10 @@ private fun MainViewModel.readMainUiState(): MainUiState {
         defaultHomePage = context.getPrefString(PreferKey.defaultHomePage, "bookshelf")
             ?: "bookshelf",
         showBottomView = context.getPrefBoolean(PreferKey.showBottomView, true),
-        useFloatingBottomBar = context.getPrefBoolean(PreferKey.useFloatingBottomBar, false),
+        useFloatingBottomBar = context.getPrefBoolean(PreferKey.useFloatingBottomBar, true),
         useFloatingBottomBarLiquidGlass = context.getPrefBoolean(
             PreferKey.useFloatingBottomBarLiquidGlass,
-            false
+            true
         ),
         labelVisibilityMode = context.getPrefString(PreferKey.labelVisibilityMode, "auto") ?: "auto",
         navExtended = context.getPrefBoolean(NAV_EXTENDED_KEY, false)

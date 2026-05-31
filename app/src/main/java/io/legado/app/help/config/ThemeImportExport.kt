@@ -521,8 +521,8 @@ data class ThemeExportData(
     val itemDividerColor: Int = 0,
 
     // 模糊设置
-    val enableBlur: Boolean = false,
-    val enableProgressiveBlur: Boolean = false,
+    val enableBlur: Boolean = true,
+    val enableProgressiveBlur: Boolean = true,
     val topBarBlurRadius: Int = 24,
     val bottomBarBlurRadius: Int = 8,
     val topBarBlurAlpha: Int = 73,
@@ -544,8 +544,8 @@ data class ThemeExportData(
     val showStatusBar: Boolean = true,
     val swipeAnimation: Boolean = true,
     val showBottomView: Boolean = true,
-    val useFloatingBottomBar: Boolean = false,
-    val useFloatingBottomBarLiquidGlass: Boolean = false,
+    val useFloatingBottomBar: Boolean = true,
+    val useFloatingBottomBarLiquidGlass: Boolean = true,
     val tabletInterface: String = "auto",
     val labelVisibilityMode: String = "auto",
     val defaultHomePage: String = "bookshelf",

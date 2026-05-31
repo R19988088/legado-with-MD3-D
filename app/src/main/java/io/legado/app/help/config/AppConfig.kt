@@ -898,7 +898,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         }
 
     var enableBlur
-        get() = appCtx.getPrefBoolean(PreferKey.enableBlur, false)
+        get() = appCtx.getPrefBoolean(PreferKey.enableBlur, true)
         set(value) {
             appCtx.putPrefBoolean(PreferKey.enableBlur, value)
         }
