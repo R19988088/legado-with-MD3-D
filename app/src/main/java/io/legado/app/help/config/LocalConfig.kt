@@ -15,6 +15,7 @@ object LocalConfig : SharedPreferences
 by appCtx.getSharedPreferences("local", Context.MODE_PRIVATE) {
 
     private const val versionCodeKey = "appVersionCode"
+    private const val md3DefaultAppearanceVersionKey = "md3DefaultAppearanceVersion"
 
     /**
      * 本地密码,用来对需要备份的敏感信息加密,如 webdav 配置等
@@ -76,6 +77,9 @@ by appCtx.getSharedPreferences("local", Context.MODE_PRIVATE) {
 
     val needUpDictRule: Boolean
         get() = !isLastVersion(2, "needUpDictRule")
+
+    val needApplyMd3DefaultAppearance: Boolean
+        get() = !isLastVersion(1, md3DefaultAppearanceVersionKey)
 
     var versionCode
         get() = getLong(versionCodeKey, 0)

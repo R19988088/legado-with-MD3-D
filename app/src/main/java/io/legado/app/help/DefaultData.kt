@@ -1,6 +1,7 @@
 package io.legado.app.help
 
 import io.legado.app.constant.AppConst
+import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
 import io.legado.app.data.entities.DictRule
 import io.legado.app.data.entities.HttpTTS
@@ -16,6 +17,7 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.fromJsonArray
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.printOnDebug
+import io.legado.app.utils.putPrefBoolean
 import splitties.init.appCtx
 import java.io.File
 
@@ -23,6 +25,9 @@ object DefaultData {
 
     fun upVersion() {
         if (LocalConfig.versionCode < AppConst.appInfo.versionCode) {
+            if (LocalConfig.needApplyMd3DefaultAppearance) {
+                applyMd3DefaultAppearance()
+            }
             Coroutine.async {
                 if (LocalConfig.needUpHttpTTS) {
                     importDefaultHttpTTS()
@@ -40,6 +45,14 @@ object DefaultData {
                 it.printOnDebug()
             }
         }
+    }
+
+    private fun applyMd3DefaultAppearance() {
+        appCtx.putPrefBoolean(PreferKey.showBottomView, true)
+        appCtx.putPrefBoolean(PreferKey.useFloatingBottomBar, true)
+        appCtx.putPrefBoolean(PreferKey.useFloatingBottomBarLiquidGlass, true)
+        appCtx.putPrefBoolean(PreferKey.enableBlur, true)
+        appCtx.putPrefBoolean(PreferKey.enableProgressiveBlur, true)
     }
 
     val httpTTS: List<HttpTTS> by lazy {
