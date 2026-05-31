@@ -22,9 +22,9 @@ object ThemeConfig {
 
     var bottomBarOpacity by prefDelegate(PreferKey.bottomBarOpacity, 100)
 
-    var enableBlur by prefDelegate(PreferKey.enableBlur, false)
+    var enableBlur by prefDelegate(PreferKey.enableBlur, true)
 
-    var enableProgressiveBlur by prefDelegate(PreferKey.enableProgressiveBlur, false)
+    var enableProgressiveBlur by prefDelegate(PreferKey.enableProgressiveBlur, true)
 
     var topBarBlurRadius by prefDelegate(PreferKey.topBarBlurRadius, 24)
 
@@ -151,11 +151,11 @@ object ThemeConfig {
 
     var showBottomView by prefDelegate(PreferKey.showBottomView, true)
 
-    var useFloatingBottomBar by prefDelegate(PreferKey.useFloatingBottomBar, false)
+    var useFloatingBottomBar by prefDelegate(PreferKey.useFloatingBottomBar, true)
 
     var useFloatingBottomBarLiquidGlass by prefDelegate(
         PreferKey.useFloatingBottomBarLiquidGlass,
-        false
+        true
     )
 
     var tabletInterface by prefDelegate(PreferKey.tabletInterface, "auto")

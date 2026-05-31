@@ -262,7 +262,7 @@ object BookshelfConfig {
     /**
      * 书架封面阴影
      */
-    private val _bookshelfCoverShadow = prefStateDelegate(PreferKey.bookshelfCoverShadow, false)
+    private val _bookshelfCoverShadow = prefStateDelegate(PreferKey.bookshelfCoverShadow, true)
     var bookshelfCoverShadow by _bookshelfCoverShadow
     val bookshelfCoverShadowState: State<Boolean> get() = _bookshelfCoverShadow.state
 
