@@ -31,6 +31,7 @@ import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
@@ -53,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -104,6 +106,7 @@ import io.legado.app.ui.widget.components.topbar.M3GlassScrollBehavior
 import io.legado.app.ui.widget.components.topbar.MiuixGlassScrollBehavior
 import io.legado.app.ui.widget.components.topbar.TopBarActionButton
 import io.legado.app.ui.widget.components.topbar.TopBarNavigationButton
+import io.legado.app.utils.formatBookInfoReadDuration
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -170,15 +173,6 @@ private fun BookInfoScreenContent(
                 scrollBehavior = scrollBehavior,
             )
         },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { onIntent(BookInfoIntent.ReadClick) },
-                containerColor = LegadoTheme.colorScheme.primaryContainer,
-                contentColor = LegadoTheme.colorScheme.onPrimaryContainer,
-                icon = { Icon(Icons.Default.Book, null) },
-                text = { Text(stringResource(R.string.reading)) },
-            )
-        },
         alwaysDrawBehindBars = true,
     ) { paddingValues ->
         val book = state.book
@@ -231,6 +225,7 @@ private fun BookInfoScreenContent(
                             ) {
                                 BookInfoActions(
                                     inBookshelf = state.inBookshelf,
+                                    readRecordTotalTime = state.readRecordTotalTime,
                                     onShelfClick = { onIntent(BookInfoIntent.ShelfClick) },
                                     onTocClick = { onIntent(BookInfoIntent.TocClick) },
                                     onGroupClick = { onIntent(BookInfoIntent.GroupClick) },
@@ -258,6 +253,18 @@ private fun BookInfoScreenContent(
                         }
                     }
                 }
+                BookInfoBottomActions(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = paddingValues.calculateBottomPadding() + 16.dp,
+                        ),
+                    inBookshelf = state.inBookshelf,
+                    onDeleteClick = { onIntent(BookInfoIntent.ShelfClick) },
+                    onReadClick = { onIntent(BookInfoIntent.ReadClick) },
+                )
             }
         }
     }
@@ -337,6 +344,37 @@ private fun BookInfoScreenContent(
     }
 
     BookInfoDialogs(state = state, onIntent = onIntent)
+}
+
+@Composable
+private fun BookInfoBottomActions(
+    modifier: Modifier = Modifier,
+    inBookshelf: Boolean,
+    onDeleteClick: () -> Unit,
+    onReadClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = if (inBookshelf) Arrangement.SpaceBetween else Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (inBookshelf) {
+            ExtendedFloatingActionButton(
+                onClick = onDeleteClick,
+                containerColor = LegadoTheme.colorScheme.errorContainer,
+                contentColor = LegadoTheme.colorScheme.onErrorContainer,
+                icon = { Icon(Icons.Default.Delete, null) },
+                text = { Text(stringResource(R.string.delete)) },
+            )
+        }
+        ExtendedFloatingActionButton(
+            onClick = onReadClick,
+            containerColor = LegadoTheme.colorScheme.primaryContainer,
+            contentColor = LegadoTheme.colorScheme.onPrimaryContainer,
+            icon = { Icon(Icons.Default.Book, null) },
+            text = { Text(stringResource(R.string.reading)) },
+        )
+    }
 }
 
 @Composable
@@ -662,6 +700,12 @@ private fun BookInfoHeader(
                 Box(
                     modifier = Modifier
                         .width(112.dp)
+                        .shadow(
+                            elevation = 18.dp,
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
+                            ambientColor = Color.Black.copy(alpha = 0.30f),
+                            spotColor = Color.Black.copy(alpha = 0.42f),
+                        )
                         .combinedClickable(onClick = onCoverClick, onLongClick = onCoverLongClick)
                 ) {
                     CoilBookCover(
@@ -774,6 +818,7 @@ private fun BookInfoHeader(
 @Composable
 private fun BookInfoActions(
     inBookshelf: Boolean,
+    readRecordTotalTime: Long,
     onShelfClick: () -> Unit,
     onTocClick: () -> Unit,
     onGroupClick: () -> Unit,
@@ -845,7 +890,11 @@ private fun BookInfoActions(
         BookInfoActionCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Default.Timeline,
-            label = stringResource(R.string.read_record),
+            label = if (readRecordTotalTime > 0L) {
+                formatBookInfoReadDuration(readRecordTotalTime)
+            } else {
+                stringResource(R.string.read_record)
+            },
             onClick = onReadRecordClick
         )
     }
