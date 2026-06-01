@@ -12,7 +12,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -36,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -45,7 +43,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.withSave
-import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import io.legado.app.ui.config.coverConfig.CoverConfig
 import io.legado.app.ui.theme.LegadoTheme
@@ -54,16 +51,6 @@ import io.legado.app.model.BookCover as BookCoverModel
 
 private const val SharedCoverRadiusCacheMaxSize = 256
 private val sharedCoverRadiusCache = mutableStateMapOf<String, Dp>()
-private const val UseDefaultCoverSentinel = "use_default_cover"
-
-internal fun normalizeCoverPath(path: String?): String? {
-    val trimmed = path?.trim()
-    return when {
-        trimmed.isNullOrEmpty() -> null
-        trimmed == UseDefaultCoverSentinel -> null
-        else -> trimmed
-    }
-}
 
 @Composable
 fun BookCoverImage(
@@ -83,23 +70,17 @@ fun BookCoverImage(
     val context = LocalContext.current
     val isNight = isSystemInDarkTheme()
 
-    val normalizedPath = normalizeCoverPath(path)
     val useDefault = !ignoreUseDefaultCover && CoverConfig.useDefaultCover
-    val finalPath = if (useDefault) null else normalizedPath
+    val finalPath = if (useDefault) null else path
 
-    val randomPath = remember(name, author, normalizedPath, isNight) {
+    val randomPath = remember(name, author, path, isNight) {
         BookCoverModel.getRandomDefaultPath(
-            seed = name ?: author ?: normalizedPath ?: "",
+            seed = name ?: author ?: path ?: "",
             isNight = isNight
         )
     }
 
     val hasCustomDefault = !randomPath.isNullOrBlank()
-    val builtInDefaultBitmap = remember(hasCustomDefault) {
-        if (hasCustomDefault) null else {
-            BookCoverModel.defaultDrawable.toBitmap().asImageBitmap()
-        }
-    }
     var isOnlineCoverLoaded by remember(finalPath) {
         mutableStateOf(sharedCoverKey != null && finalPath != null)
     }
@@ -123,13 +104,6 @@ fun BookCoverImage(
                 ),
                 contentDescription = null,
                 imageLoader = koinInject(),
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else if (builtInDefaultBitmap != null && !isOnlineCoverLoaded) {
-            Image(
-                bitmap = builtInDefaultBitmap,
-                contentDescription = null,
                 contentScale = contentScale,
                 modifier = Modifier.fillMaxSize()
             )
@@ -188,13 +162,12 @@ fun CoilBookCover(
 ) {
     val isNight = isSystemInDarkTheme()
 
-    val normalizedPath = normalizeCoverPath(path)
     val useDefault = !ignoreUseDefaultCover && CoverConfig.useDefaultCover
-    val finalPath = if (useDefault) null else normalizedPath
+    val finalPath = if (useDefault) null else path
 
-    val randomPath = remember(name, author, normalizedPath, isNight) {
+    val randomPath = remember(name, author, path, isNight) {
         BookCoverModel.getRandomDefaultPath(
-            seed = name ?: author ?: normalizedPath ?: "",
+            seed = name ?: author ?: path ?: "",
             isNight = isNight
         )
     }
@@ -247,7 +220,7 @@ fun CoilBookCover(
         BookCoverImage(
             name = name,
             author = author,
-            path = normalizedPath,
+            path = path,
             modifier = Modifier.fillMaxSize(),
             sourceOrigin = sourceOrigin,
             ignoreUseDefaultCover = ignoreUseDefaultCover,
