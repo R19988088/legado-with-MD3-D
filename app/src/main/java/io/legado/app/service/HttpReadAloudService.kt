@@ -518,8 +518,8 @@ class HttpReadAloudService : BaseReadAloudService(),
     }
 
 
-    override fun pauseReadAloud(abandonFocus: Boolean) {
-        super.pauseReadAloud(abandonFocus)
+    override fun pauseReadAloud(abandonFocus: Boolean, manual: Boolean) {
+        super.pauseReadAloud(abandonFocus, manual)
         kotlin.runCatching {
             playIndexJob?.cancel()
             exoPlayer.pause()

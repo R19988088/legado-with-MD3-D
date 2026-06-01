@@ -584,7 +584,7 @@ object ReadBook : CoroutineScope by MainScope(), KoinComponent {
                 if (scrollPageAnim && pageChanged) {
                     ReadAloud.pause(appCtx)
                 } else {
-                    readAloud(!BaseReadAloudService.pause)
+                    readAloud(BaseReadAloudService.shouldAutoResumeAfterChapterChange())
                 }
             }
         }

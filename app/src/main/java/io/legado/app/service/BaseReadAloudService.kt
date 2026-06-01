@@ -89,6 +89,12 @@ abstract class BaseReadAloudService : BaseService(),
         }
 
         private const val TAG = "BaseReadAloudService"
+        private val continuationPolicy = ReadAloudContinuationPolicy()
+
+        @JvmStatic
+        fun shouldAutoResumeAfterChapterChange(): Boolean {
+            return continuationPolicy.shouldAutoResumeAfterChapterChange()
+        }
 
     }
 
@@ -215,7 +221,7 @@ abstract class BaseReadAloudService : BaseService(),
                 intent.getIntExtra("startPos", 0)
             )
 
-            IntentAction.pause -> pauseReadAloud()
+            IntentAction.pause -> pauseReadAloud(manual = true)
             IntentAction.resume -> resumeReadAloud()
             IntentAction.upTtsSpeechRate -> upSpeechRate(true)
             IntentAction.prevParagraph -> prevP()
@@ -283,6 +289,7 @@ abstract class BaseReadAloudService : BaseService(),
         }
         isRun = true
         pause = false
+        continuationPolicy.onPlayStarted()
         needResumeOnAudioFocusGain = false
         needResumeOnCallStateIdle = false
         upReadAloudNotification()
@@ -292,12 +299,17 @@ abstract class BaseReadAloudService : BaseService(),
     abstract fun playStop()
 
     @CallSuper
-    open fun pauseReadAloud(abandonFocus: Boolean = true) {
+    open fun pauseReadAloud(abandonFocus: Boolean = true, manual: Boolean = false) {
         if (useWakeLock) {
             wakeLock.release()
             wifiLock?.release()
         }
         pause = true
+        if (manual) {
+            continuationPolicy.onManualPause()
+        } else {
+            continuationPolicy.onSystemPause()
+        }
         if (abandonFocus) {
             abandonFocus()
         }
@@ -316,6 +328,7 @@ abstract class BaseReadAloudService : BaseService(),
 
     private fun resumeReadAloudInternal() {
         pause = false
+        continuationPolicy.onResume()
         needResumeOnAudioFocusGain = false
         needResumeOnCallStateIdle = false
         upReadAloudNotification()
