@@ -151,6 +151,7 @@ fun CoilBookCover(
     path: String?,
     radius: Dp = 4.dp,
     modifier: Modifier = Modifier.width(64.dp),
+    enforceAspectRatio: Boolean = true,
     sourceOrigin: String? = null,
     onLoadFinish: (() -> Unit)? = null,
     ignoreUseDefaultCover: Boolean = false,
@@ -191,7 +192,7 @@ fun CoilBookCover(
 
     Box(
         modifier = modifier
-            .aspectRatio(5f / 7f)
+            .then(if (enforceAspectRatio) Modifier.aspectRatio(5f / 7f) else Modifier)
             .then(
                 with(sharedTransitionScope) {
                     if (this != null && animatedVisibilityScope != null && sharedCoverKey != null) {

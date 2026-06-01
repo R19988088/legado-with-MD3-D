@@ -85,7 +85,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalConfiguration
@@ -133,7 +132,6 @@ import io.legado.app.ui.widget.components.progressIndicator.AppCircularProgressI
 import io.legado.app.ui.widget.components.tabRow.AppTabRow
 import io.legado.app.ui.widget.components.text.AppText
 import io.legado.app.ui.widget.components.topbar.GlassMediumFlexibleTopAppBar
-import io.legado.app.ui.widget.components.topbar.GlassTopAppBarDefaults
 import io.legado.app.ui.widget.components.topbar.GlassTopAppBarScrollBehavior
 import io.legado.app.ui.widget.components.topbar.TopBarActionButton
 import kotlinx.collections.immutable.ImmutableList
@@ -358,7 +356,6 @@ fun BookshelfScreen(
         }
     }
 
-    val scrollBehavior = GlassTopAppBarDefaults.defaultScrollBehavior()
     var showTopBarMenu by remember { mutableStateOf(false) }
     val onSearchClick = {
         if (BookshelfConfig.bookshelfSearchActionDirectToSearchState.value) {
@@ -373,7 +370,6 @@ fun BookshelfScreen(
     }
 
     AppScaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0),
         snackbarHost = {
             SnackbarHost(
@@ -389,7 +385,6 @@ fun BookshelfScreen(
         topBar = {
             BookshelfTopBar(
                 uiState = uiState,
-                scrollBehavior = scrollBehavior,
                 onSearchClick = onSearchClick,
                 onSearchQueryChange = { viewModel.setSearchKey(it) },
                 onSearchSubmit = { rawQuery ->
@@ -1014,7 +1009,7 @@ fun BookshelfScreen(
 @Composable
 private fun BookshelfTopBar(
     uiState: BookshelfUiState,
-    scrollBehavior: GlassTopAppBarScrollBehavior,
+    scrollBehavior: GlassTopAppBarScrollBehavior? = null,
     onSearchClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onSearchSubmit: (String) -> Unit,

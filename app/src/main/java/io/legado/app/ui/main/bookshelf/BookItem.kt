@@ -672,8 +672,7 @@ fun BookItem(
                 isUpdating = isUpdating,
                 modifier = modifier,
                 coverModifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(5f / 7f),
+                    .fillMaxSize(),
                 sourceOrigin = book.origin,
                 badgeText = if (layoutMode != 0) unreadText else null,
                 showBadgeDot = BookshelfConfig.showUnread && BookshelfConfig.showUnreadNew && book.isNew,

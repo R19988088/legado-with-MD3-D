@@ -44,6 +44,7 @@ fun BookshelfCover(
             author = author,
             path = path,
             modifier = coverModifier,
+            enforceAspectRatio = false,
             sourceOrigin = sourceOrigin,
             onLoadFinish = onLoadFinish,
             showLoadingPlaceholder = showLoadingPlaceholder,
