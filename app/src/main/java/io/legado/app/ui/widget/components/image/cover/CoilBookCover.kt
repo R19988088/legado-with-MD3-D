@@ -54,6 +54,16 @@ import io.legado.app.model.BookCover as BookCoverModel
 
 private const val SharedCoverRadiusCacheMaxSize = 256
 private val sharedCoverRadiusCache = mutableStateMapOf<String, Dp>()
+private const val UseDefaultCoverSentinel = "use_default_cover"
+
+internal fun normalizeCoverPath(path: String?): String? {
+    val trimmed = path?.trim()
+    return when {
+        trimmed.isNullOrEmpty() -> null
+        trimmed == UseDefaultCoverSentinel -> null
+        else -> trimmed
+    }
+}
 
 @Composable
 fun BookCoverImage(
@@ -73,12 +83,13 @@ fun BookCoverImage(
     val context = LocalContext.current
     val isNight = isSystemInDarkTheme()
 
+    val normalizedPath = normalizeCoverPath(path)
     val useDefault = !ignoreUseDefaultCover && CoverConfig.useDefaultCover
-    val finalPath = if (useDefault) null else path
+    val finalPath = if (useDefault) null else normalizedPath
 
-    val randomPath = remember(name, author, path, isNight) {
+    val randomPath = remember(name, author, normalizedPath, isNight) {
         BookCoverModel.getRandomDefaultPath(
-            seed = name ?: author ?: path ?: "",
+            seed = name ?: author ?: normalizedPath ?: "",
             isNight = isNight
         )
     }
@@ -177,12 +188,13 @@ fun CoilBookCover(
 ) {
     val isNight = isSystemInDarkTheme()
 
+    val normalizedPath = normalizeCoverPath(path)
     val useDefault = !ignoreUseDefaultCover && CoverConfig.useDefaultCover
-    val finalPath = if (useDefault) null else path
+    val finalPath = if (useDefault) null else normalizedPath
 
-    val randomPath = remember(name, author, path, isNight) {
+    val randomPath = remember(name, author, normalizedPath, isNight) {
         BookCoverModel.getRandomDefaultPath(
-            seed = name ?: author ?: path ?: "",
+            seed = name ?: author ?: normalizedPath ?: "",
             isNight = isNight
         )
     }
@@ -235,7 +247,7 @@ fun CoilBookCover(
         BookCoverImage(
             name = name,
             author = author,
-            path = path,
+            path = normalizedPath,
             modifier = Modifier.fillMaxSize(),
             sourceOrigin = sourceOrigin,
             ignoreUseDefaultCover = ignoreUseDefaultCover,
