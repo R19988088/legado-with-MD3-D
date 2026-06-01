@@ -12,6 +12,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -43,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.withSave
+import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import io.legado.app.ui.config.coverConfig.CoverConfig
 import io.legado.app.ui.theme.LegadoTheme
@@ -81,6 +84,11 @@ fun BookCoverImage(
     }
 
     val hasCustomDefault = !randomPath.isNullOrBlank()
+    val builtInDefaultBitmap = remember(hasCustomDefault) {
+        if (hasCustomDefault) null else {
+            BookCoverModel.defaultDrawable.toBitmap().asImageBitmap()
+        }
+    }
     var isOnlineCoverLoaded by remember(finalPath) {
         mutableStateOf(sharedCoverKey != null && finalPath != null)
     }
@@ -104,6 +112,13 @@ fun BookCoverImage(
                 ),
                 contentDescription = null,
                 imageLoader = koinInject(),
+                contentScale = contentScale,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else if (builtInDefaultBitmap != null && !isOnlineCoverLoaded) {
+            Image(
+                bitmap = builtInDefaultBitmap,
+                contentDescription = null,
                 contentScale = contentScale,
                 modifier = Modifier.fillMaxSize()
             )

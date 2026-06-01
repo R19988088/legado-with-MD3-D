@@ -41,6 +41,7 @@ fun GlassMediumFlexibleTopAppBar(
     useCharMode: Boolean = false,
     subtitle: String? = null,
     scrollBehavior: GlassTopAppBarScrollBehavior? = null,
+    forceCompact: Boolean = false,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomContent: @Composable (ColumnScope.() -> Unit)? = null
@@ -116,7 +117,7 @@ fun GlassMediumFlexibleTopAppBar(
             }
 
             else -> {
-                if (ThemeConfig.useFlexibleTopAppBar) {
+                if (ThemeConfig.useFlexibleTopAppBar && !forceCompact) {
                     MediumFlexibleTopAppBar(
                         modifier = Modifier,
                         title = {

@@ -1028,6 +1028,7 @@ private fun BookshelfTopBar(
         useCharMode = uiState.isLoading,
         subtitle = uiState.subtitle,
         scrollBehavior = scrollBehavior,
+        forceCompact = true,
         actions = {
             TopBarActionButton(
                 onClick = onSearchClick,
