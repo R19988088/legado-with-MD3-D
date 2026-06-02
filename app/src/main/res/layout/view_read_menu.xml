@@ -176,15 +176,25 @@
                 tools:ignore="TouchTargetSizeCheck"/>
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButtonGroup
-            android:id="@+id/bottom_view"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bottom_view_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            app:overflowMode="menu"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="16dp"
-            android:background="?attr/colorSurfaceContainer" />
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <com.google.android.material.button.MaterialButtonGroup
+                android:id="@+id/bottom_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                app:overflowMode="menu"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp" />
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

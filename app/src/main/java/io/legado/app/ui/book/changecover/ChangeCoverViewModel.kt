@@ -149,9 +149,7 @@ class ChangeCoverViewModel(application: Application) : BaseViewModel(application
         val searchBook = WebBook.searchBookAwait(
             source, name,
             shouldBreak = { it > 0 }).firstOrNull() ?: return
-        if (searchBook.name == name && searchBook.author == author
-            && !searchBook.coverUrl.isNullOrEmpty()
-        ) {
+        if (CoverSearchMatcher.matches(searchBook, name, author)) {
             appDb.searchBookDao.insert(searchBook)
             searchSuccess?.invoke(searchBook)
         }

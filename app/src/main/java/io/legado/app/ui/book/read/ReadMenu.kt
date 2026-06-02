@@ -6,9 +6,11 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
+import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -41,10 +43,12 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.source.getSourceType
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.model.ReadBook
+import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.browser.WebViewActivity
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 import io.legado.app.utils.ConstraintModify
 import io.legado.app.utils.activity
+import io.legado.app.utils.applyNavigationBarMargin
 import io.legado.app.utils.applyNavigationBarPadding
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getPrefBoolean
@@ -235,6 +239,7 @@ class ReadMenu @JvmOverloads constructor(
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
         bottomView.setBackgroundColor(alphaBgColor)
+        applyBottomBarStyle(bgColor)
         (tvPre.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         (tvNext.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         cdSlider.setCardBackgroundColor(alphaBgColor)
@@ -260,8 +265,31 @@ class ReadMenu @JvmOverloads constructor(
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.bottomMenu.applyNavigationBarPadding()
         } else {
-            binding.bottomView.applyNavigationBarPadding()
+            binding.bottomViewCard.applyNavigationBarMargin(withInitialMargin = true)
         }
+    }
+
+    private fun applyBottomBarStyle(baseColor: Int) = binding.run {
+        val style = ReadMenuBottomBarStyle.resolve(
+            useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
+            useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
+            liquidGlassAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+            baseColor = baseColor,
+            menuAlpha = AppConfig.menuAlpha,
+            bottomBarBlurAlpha = ThemeConfig.bottomBarBlurAlpha
+        )
+        val horizontalMargin = style.horizontalMarginDp.dpToPx()
+        val bottomMargin = style.bottomMarginDp.dpToPx()
+        (bottomViewCard.layoutParams as? ViewGroup.MarginLayoutParams)?.let { params ->
+            params.leftMargin = horizontalMargin
+            params.rightMargin = horizontalMargin
+            params.bottomMargin = bottomMargin
+            bottomViewCard.layoutParams = params
+        }
+        bottomViewCard.radius = style.cornerRadiusDp.dpToPx()
+        bottomViewCard.cardElevation = style.elevationDp.dpToPx()
+        bottomViewCard.setCardBackgroundColor(style.backgroundColor)
+        bottomView.setBackgroundColor(ColorUtils.setAlphaComponent(baseColor, 0))
     }
 
     fun updateToolBarColor() {
