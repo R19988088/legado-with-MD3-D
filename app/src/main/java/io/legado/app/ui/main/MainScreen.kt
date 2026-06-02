@@ -1,7 +1,6 @@
 package io.legado.app.ui.main
 
 import android.content.Intent
-import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -77,6 +76,7 @@ import io.legado.app.ui.main.my.PrefClickEvent
 import io.legado.app.ui.main.rss.RssScreen
 import io.legado.app.ui.widget.components.AppScaffold
 import io.legado.app.ui.widget.components.FloatingBottomBar
+import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import io.legado.app.ui.widget.components.FloatingBottomBarItem
 import io.legado.app.ui.widget.components.GlassDefaults
 import io.legado.app.ui.widget.components.icon.AppIcon
@@ -185,11 +185,14 @@ fun MainScreen(
     }
     val labelVisibilityMode = mainUiState.labelVisibilityMode
     val isUnlabeled = labelVisibilityMode == "unlabeled"
-    val useFloatingBottomBar =
-        !useRail && mainUiState.showBottomView && mainUiState.useFloatingBottomBar
-    val useLiquidGlass = useFloatingBottomBar &&
-            mainUiState.useFloatingBottomBarLiquidGlass &&
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val bottomBarConfig = FloatingBottomBarConfig.resolve(
+        useFloatingBottomBar = !useRail && mainUiState.showBottomView && mainUiState.useFloatingBottomBar,
+        useFloatingBottomBarLiquidGlass = mainUiState.useFloatingBottomBarLiquidGlass,
+        blurRadius = ThemeConfig.bottomBarBlurRadius,
+        blurAlpha = ThemeConfig.bottomBarBlurAlpha,
+        lensRadius = ThemeConfig.bottomBarLensRadius
+    )
+    val useFloatingBottomBar = bottomBarConfig.floating
     val alwaysShowLabel = labelVisibilityMode == "labeled"
     val showLabel = !isUnlabeled
 
@@ -344,7 +347,7 @@ fun MainScreen(
             ) {
                 Box(
                     modifier = Modifier.then(
-                        if (useLiquidGlass) {
+                        if (bottomBarConfig.liquidGlass) {
                             Modifier
                                 .hazeSource(hazeState)
                                 .layerBackdrop(floatingBarBackdrop)
@@ -462,7 +465,7 @@ fun MainScreen(
                             },
                             backdrop = floatingBarBackdrop,
                             tabsCount = destinations.size,
-                            isBlurEnabled = useLiquidGlass,
+                            config = bottomBarConfig,
                             hasCustomIcons = destinations.any { dest ->
                                 dest.customIconPath.isNotEmpty()
                             }

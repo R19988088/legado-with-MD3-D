@@ -6,7 +6,6 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
-import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -45,6 +44,7 @@ import io.legado.app.lib.dialogs.alert
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.browser.WebViewActivity
+import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 import io.legado.app.utils.ConstraintModify
 import io.legado.app.utils.activity
@@ -271,13 +271,17 @@ class ReadMenu @JvmOverloads constructor(
 
     private fun applyBottomBarStyle(baseColor: Int) = binding.run {
         val bottomViewCard = bottomViewCard ?: return@run
-        val style = ReadMenuBottomBarStyle.resolve(
+        val config = FloatingBottomBarConfig.resolve(
             useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
             useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
-            liquidGlassAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU,
+            blurRadius = ThemeConfig.bottomBarBlurRadius,
+            blurAlpha = ThemeConfig.bottomBarBlurAlpha,
+            lensRadius = ThemeConfig.bottomBarLensRadius
+        )
+        val style = ReadMenuBottomBarStyle.resolve(
+            config = config,
             baseColor = baseColor,
-            menuAlpha = AppConfig.menuAlpha,
-            bottomBarBlurAlpha = ThemeConfig.bottomBarBlurAlpha
+            menuAlpha = AppConfig.menuAlpha
         )
         val horizontalMargin = style.horizontalMarginDp.dpToPx()
         val bottomMargin = style.bottomMarginDp.dpToPx()

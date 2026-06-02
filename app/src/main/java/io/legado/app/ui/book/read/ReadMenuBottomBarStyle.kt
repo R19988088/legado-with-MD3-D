@@ -1,5 +1,7 @@
 package io.legado.app.ui.book.read
 
+import io.legado.app.ui.widget.components.FloatingBottomBarConfig
+
 data class ReadMenuBottomBarStyle(
     val floating: Boolean,
     val liquidGlass: Boolean,
@@ -11,28 +13,23 @@ data class ReadMenuBottomBarStyle(
 ) {
     companion object {
         fun resolve(
-            useFloatingBottomBar: Boolean,
-            useFloatingBottomBarLiquidGlass: Boolean,
-            liquidGlassAvailable: Boolean,
+            config: FloatingBottomBarConfig,
             baseColor: Int,
-            menuAlpha: Int,
-            bottomBarBlurAlpha: Int
+            menuAlpha: Int
         ): ReadMenuBottomBarStyle {
-            val floating = useFloatingBottomBar
-            val liquidGlass = floating && useFloatingBottomBarLiquidGlass && liquidGlassAvailable
-            val alpha = if (liquidGlass) {
-                bottomBarBlurAlpha.coerceIn(0, 100)
+            val alpha = if (config.liquidGlass) {
+                config.blurAlpha
             } else {
                 menuAlpha.coerceIn(0, 100)
             }
             return ReadMenuBottomBarStyle(
-                floating = floating,
-                liquidGlass = liquidGlass,
+                floating = config.floating,
+                liquidGlass = config.liquidGlass,
                 backgroundColor = baseColor.withAlpha((alpha / 100f * 255).toInt()),
-                cornerRadiusDp = if (floating) 32f else 0f,
-                horizontalMarginDp = if (floating) 16 else 0,
-                bottomMarginDp = if (floating) 12 else 0,
-                elevationDp = if (floating) 8f else 0f
+                cornerRadiusDp = if (config.floating) 32f else 0f,
+                horizontalMarginDp = if (config.floating) 16 else 0,
+                bottomMarginDp = if (config.floating) 12 else 0,
+                elevationDp = if (config.floating) 8f else 0f
             )
         }
 

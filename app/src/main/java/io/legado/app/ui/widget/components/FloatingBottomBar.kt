@@ -110,20 +110,21 @@ fun FloatingBottomBar(
     onSelected: (index: Int) -> Unit,
     backdrop: Backdrop,
     tabsCount: Int,
-    isBlurEnabled: Boolean = true,
+    config: FloatingBottomBarConfig,
     hasCustomIcons: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
     val isInLightTheme = !LegadoTheme.isDark
+    val isBlurEnabled = config.liquidGlass
     val accentColor = if (ThemeConfig.enableDeepPersonalization && ThemeConfig.themeColor != 0) {
         Color(ThemeConfig.themeColor)
     } else {
         LegadoTheme.colorScheme.primary
     }
     val containerColor = if (ThemeConfig.enableDeepPersonalization && ThemeConfig.secondaryThemeColor != 0) {
-        Color(ThemeConfig.secondaryThemeColor).copy(alpha = if (isBlurEnabled) ThemeConfig.bottomBarBlurAlpha / 100f else 1f)
+        Color(ThemeConfig.secondaryThemeColor).copy(alpha = if (isBlurEnabled) config.blurAlpha / 100f else 1f)
     } else if (isBlurEnabled) {
-        LegadoTheme.colorScheme.surfaceContainer.copy(alpha = ThemeConfig.bottomBarBlurAlpha / 100f)
+        LegadoTheme.colorScheme.surfaceContainer.copy(alpha = config.blurAlpha / 100f)
     } else {
         LegadoTheme.colorScheme.surfaceContainer
     }
@@ -258,8 +259,8 @@ fun FloatingBottomBar(
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
-                            blur(ThemeConfig.bottomBarBlurRadius.toFloat().dp.toPx())
-                            lens(ThemeConfig.bottomBarLensRadius.dp.toPx(), ThemeConfig.bottomBarLensRadius.dp.toPx())
+                            blur(config.blurRadius.toFloat().dp.toPx())
+                            lens(config.lensRadius.dp.toPx(), config.lensRadius.dp.toPx())
                         }
                     },
                     highlight = {
@@ -315,8 +316,8 @@ fun FloatingBottomBar(
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
                                 vibrancy()
-                                blur(ThemeConfig.bottomBarBlurRadius.toFloat().dp.toPx())
-                                lens(ThemeConfig.bottomBarLensRadius.dp.toPx() * progress, ThemeConfig.bottomBarLensRadius.dp.toPx() * progress)
+                                blur(config.blurRadius.toFloat().dp.toPx())
+                                lens(config.lensRadius.dp.toPx() * progress, config.lensRadius.dp.toPx() * progress)
                             }
                         },
                         highlight = {

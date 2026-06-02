@@ -1,5 +1,6 @@
 package io.legado.app.ui.book.read
 
+import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -10,12 +11,9 @@ class ReadMenuBottomBarStyleTest {
     @Test
     fun `normal mode keeps full width opaque bottom bar shape`() {
         val style = ReadMenuBottomBarStyle.resolve(
-            useFloatingBottomBar = false,
-            useFloatingBottomBarLiquidGlass = true,
-            liquidGlassAvailable = true,
+            config = sharedConfig(floating = false, liquidGlass = false),
             baseColor = rgb(10, 20, 30),
-            menuAlpha = 80,
-            bottomBarBlurAlpha = 40
+            menuAlpha = 80
         )
 
         assertFalse(style.floating)
@@ -28,12 +26,9 @@ class ReadMenuBottomBarStyleTest {
     @Test
     fun `floating mode uses detached capsule shape`() {
         val style = ReadMenuBottomBarStyle.resolve(
-            useFloatingBottomBar = true,
-            useFloatingBottomBarLiquidGlass = false,
-            liquidGlassAvailable = true,
+            config = sharedConfig(floating = true, liquidGlass = false),
             baseColor = rgb(10, 20, 30),
-            menuAlpha = 80,
-            bottomBarBlurAlpha = 40
+            menuAlpha = 80
         )
 
         assertTrue(style.floating)
@@ -46,12 +41,9 @@ class ReadMenuBottomBarStyleTest {
     @Test
     fun `liquid glass floating mode uses blur alpha`() {
         val style = ReadMenuBottomBarStyle.resolve(
-            useFloatingBottomBar = true,
-            useFloatingBottomBarLiquidGlass = true,
-            liquidGlassAvailable = true,
+            config = sharedConfig(floating = true, liquidGlass = true),
             baseColor = rgb(10, 20, 30),
-            menuAlpha = 80,
-            bottomBarBlurAlpha = 40
+            menuAlpha = 80
         )
 
         assertTrue(style.floating)
@@ -62,17 +54,24 @@ class ReadMenuBottomBarStyleTest {
     @Test
     fun `liquid glass setting falls back when platform cannot use it`() {
         val style = ReadMenuBottomBarStyle.resolve(
-            useFloatingBottomBar = true,
-            useFloatingBottomBarLiquidGlass = true,
-            liquidGlassAvailable = false,
+            config = sharedConfig(floating = true, liquidGlass = false),
             baseColor = rgb(10, 20, 30),
-            menuAlpha = 80,
-            bottomBarBlurAlpha = 40
+            menuAlpha = 80
         )
 
         assertTrue(style.floating)
         assertFalse(style.liquidGlass)
         assertEquals((80 / 100f * 255).toInt(), alpha(style.backgroundColor))
+    }
+
+    private fun sharedConfig(floating: Boolean, liquidGlass: Boolean): FloatingBottomBarConfig {
+        return FloatingBottomBarConfig(
+            floating = floating,
+            liquidGlass = liquidGlass,
+            blurRadius = 8,
+            blurAlpha = 40,
+            lensRadius = 24f
+        )
     }
 
     private fun rgb(red: Int, green: Int, blue: Int): Int {
