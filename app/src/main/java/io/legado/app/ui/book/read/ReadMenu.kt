@@ -265,11 +265,12 @@ class ReadMenu @JvmOverloads constructor(
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.bottomMenu.applyNavigationBarPadding()
         } else {
-            binding.bottomViewCard.applyNavigationBarMargin(withInitialMargin = true)
+            binding.bottomViewCard?.applyNavigationBarMargin(withInitialMargin = true)
         }
     }
 
     private fun applyBottomBarStyle(baseColor: Int) = binding.run {
+        val bottomViewCard = bottomViewCard ?: return@run
         val style = ReadMenuBottomBarStyle.resolve(
             useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
             useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
