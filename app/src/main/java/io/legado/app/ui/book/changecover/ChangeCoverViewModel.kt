@@ -74,9 +74,7 @@ class ChangeCoverViewModel(application: Application) : BaseViewModel(application
             trySend(defaultCover + searchBooks.toList())
         }
 
-        if (searchBooks.size <= 1) {
-            startSearch()
-        }
+        startSearch()
 
         awaitClose {
             searchBooks.clear()
