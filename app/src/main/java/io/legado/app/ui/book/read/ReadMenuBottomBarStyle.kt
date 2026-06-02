@@ -1,11 +1,14 @@
 package io.legado.app.ui.book.read
 
+import androidx.core.graphics.ColorUtils
 import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 
 data class ReadMenuBottomBarStyle(
     val floating: Boolean,
     val liquidGlass: Boolean,
     val backgroundColor: Int,
+    val strokeColor: Int,
+    val strokeWidthDp: Int,
     val cornerRadiusDp: Float,
     val horizontalMarginDp: Int,
     val bottomMarginDp: Int,
@@ -25,16 +28,20 @@ data class ReadMenuBottomBarStyle(
             return ReadMenuBottomBarStyle(
                 floating = config.floating,
                 liquidGlass = config.liquidGlass,
-                backgroundColor = baseColor.withAlpha((alpha / 100f * 255).toInt()),
+                backgroundColor = ColorUtils.setAlphaComponent(
+                    baseColor,
+                    (alpha / 100f * 255).toInt()
+                ),
+                strokeColor = ColorUtils.setAlphaComponent(
+                    baseColor,
+                    if (config.liquidGlass) 90 else 0
+                ),
+                strokeWidthDp = if (config.liquidGlass) 1 else 0,
                 cornerRadiusDp = if (config.floating) 32f else 0f,
                 horizontalMarginDp = if (config.floating) 16 else 0,
                 bottomMarginDp = if (config.floating) 12 else 0,
-                elevationDp = if (config.floating) 8f else 0f
+                elevationDp = if (config.liquidGlass) 12f else if (config.floating) 8f else 0f
             )
-        }
-
-        private fun Int.withAlpha(alpha: Int): Int {
-            return (alpha.coerceIn(0, 255) shl 24) or (this and 0x00FFFFFF)
         }
     }
 }

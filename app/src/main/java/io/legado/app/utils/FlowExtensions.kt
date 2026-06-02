@@ -72,6 +72,30 @@ inline fun <T, R> Flow<T>.mapParallelSafe(
 }.buffer(0)
 
 @OptIn(ExperimentalCoroutinesApi::class)
+inline fun <T, R> Flow<T>.mapConcurrentUnordered(
+    concurrency: Int,
+    crossinline transform: suspend (T) -> R,
+): Flow<R> = flatMapMerge(concurrency.coerceAtLeast(1)) { value ->
+    flow {
+        emit(transform(value))
+    }
+}.buffer(0)
+
+@OptIn(ExperimentalCoroutinesApi::class)
+inline fun <T, R> Flow<T>.mapConcurrentUnorderedSafe(
+    concurrency: Int,
+    crossinline transform: suspend (T) -> R,
+): Flow<R> = flatMapMerge(concurrency.coerceAtLeast(1)) { value ->
+    flow {
+        try {
+            emit(transform(value))
+        } catch (_: Throwable) {
+            currentCoroutineContext().ensureActive()
+        }
+    }
+}.buffer(0)
+
+@OptIn(ExperimentalCoroutinesApi::class)
 inline fun <T, R> Flow<T>.transformParallelSafe(
     concurrency: Int,
     crossinline transform: suspend FlowCollector<R>.(T) -> R,

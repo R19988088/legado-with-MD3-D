@@ -13,16 +13,14 @@ import io.legado.app.data.entities.BookSourcePart
 import io.legado.app.data.entities.SearchBook
 import io.legado.app.model.webBook.WebBook
 import io.legado.app.ui.config.otherConfig.OtherConfig
-import io.legado.app.utils.mapParallelSafe
+import io.legado.app.utils.mapConcurrentUnorderedSafe
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
@@ -31,11 +29,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.Collections
-import java.util.concurrent.Executors
 
 class ChangeCoverViewModel(application: Application) : BaseViewModel(application) {
     private val threadCount = OtherConfig.threadCount
-    private var searchPool: ExecutorCoroutineDispatcher? = null
     private var searchSuccess: ((SearchBook) -> Unit)? = null
     private var upAdapter: (() -> Unit)? = null
     private var bookSourceParts = arrayListOf<BookSourcePart>()
@@ -99,11 +95,6 @@ class ChangeCoverViewModel(application: Application) : BaseViewModel(application
         this.author = author.replace(AppPattern.authorRegex, "")
     }
 
-    private fun initSearchPool() {
-        searchPool = Executors
-            .newFixedThreadPool(threadCount).asCoroutineDispatcher()
-    }
-
     private fun startSearch() {
         execute {
             stopSearch()
@@ -111,25 +102,19 @@ class ChangeCoverViewModel(application: Application) : BaseViewModel(application
             upAdapter?.invoke()
             bookSourceParts.clear()
             bookSourceParts.addAll(appDb.bookSourceDao.allEnabledPart)
-            initSearchPool()
             search()
         }
     }
 
     private fun search() {
-        task = viewModelScope.launch(searchPool!!) {
-            flow {
-                for (bs in bookSourceParts) {
-                    bs.getBookSource()?.let {
-                        emit(it)
-                    }
-                }
-            }.onStart {
+        task = viewModelScope.launch(IO) {
+            bookSourceParts.asFlow().onStart {
                 searchStateData.postValue(true)
                 _isSearching.value = true
-            }.mapParallelSafe(threadCount) {
+            }.mapConcurrentUnorderedSafe(threadCount) { sourcePart ->
+                val source = sourcePart.getBookSource() ?: return@mapConcurrentUnorderedSafe
                 withTimeout(60000L) {
-                    search(it)
+                    search(source)
                 }
             }.onCompletion {
                 searchStateData.postValue(false)
@@ -163,14 +148,13 @@ class ChangeCoverViewModel(application: Application) : BaseViewModel(application
 
     fun stopSearch() {
         task?.cancel()
-        searchPool?.close()
         searchStateData.postValue(false)
         _isSearching.value = false
     }
 
     override fun onCleared() {
         super.onCleared()
-        searchPool?.close()
+        stopSearch()
     }
 
 }

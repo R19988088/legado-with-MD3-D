@@ -9,7 +9,7 @@ import org.junit.Test
 class ReadMenuBottomBarStyleTest {
 
     @Test
-    fun `normal mode keeps full width opaque bottom bar shape`() {
+    fun `normal mode keeps full width bottom bar using menu alpha`() {
         val style = ReadMenuBottomBarStyle.resolve(
             config = sharedConfig(floating = false, liquidGlass = false),
             baseColor = rgb(10, 20, 30),
@@ -20,6 +20,7 @@ class ReadMenuBottomBarStyleTest {
         assertFalse(style.liquidGlass)
         assertEquals(0f, style.cornerRadiusDp)
         assertEquals(0, style.horizontalMarginDp)
+        assertEquals(0, alpha(style.strokeColor))
         assertEquals((80 / 100f * 255).toInt(), alpha(style.backgroundColor))
     }
 
@@ -36,10 +37,11 @@ class ReadMenuBottomBarStyleTest {
         assertEquals(32f, style.cornerRadiusDp)
         assertEquals(16, style.horizontalMarginDp)
         assertEquals(12, style.bottomMarginDp)
+        assertEquals(0, alpha(style.strokeColor))
     }
 
     @Test
-    fun `liquid glass floating mode uses blur alpha`() {
+    fun `liquid glass floating mode uses blur alpha and highlight stroke`() {
         val style = ReadMenuBottomBarStyle.resolve(
             config = sharedConfig(floating = true, liquidGlass = true),
             baseColor = rgb(10, 20, 30),
@@ -49,6 +51,9 @@ class ReadMenuBottomBarStyleTest {
         assertTrue(style.floating)
         assertTrue(style.liquidGlass)
         assertEquals((40 / 100f * 255).toInt(), alpha(style.backgroundColor))
+        assertEquals(1, style.strokeWidthDp)
+        assertEquals(90, alpha(style.strokeColor))
+        assertEquals(12f, style.elevationDp)
     }
 
     @Test
@@ -61,6 +66,7 @@ class ReadMenuBottomBarStyleTest {
 
         assertTrue(style.floating)
         assertFalse(style.liquidGlass)
+        assertEquals(0, alpha(style.strokeColor))
         assertEquals((80 / 100f * 255).toInt(), alpha(style.backgroundColor))
     }
 

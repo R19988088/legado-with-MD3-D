@@ -238,7 +238,6 @@ class ReadMenu @JvmOverloads constructor(
         }
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
-        bottomView.setBackgroundColor(alphaBgColor)
         applyBottomBarStyle(bgColor)
         (tvPre.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         (tvNext.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
@@ -293,6 +292,8 @@ class ReadMenu @JvmOverloads constructor(
         }
         bottomViewCard.radius = style.cornerRadiusDp.dpToPx()
         bottomViewCard.cardElevation = style.elevationDp.dpToPx()
+        bottomViewCard.strokeWidth = style.strokeWidthDp.dpToPx()
+        bottomViewCard.strokeColor = style.strokeColor
         bottomViewCard.setCardBackgroundColor(style.backgroundColor)
         bottomView.setBackgroundColor(ColorUtils.setAlphaComponent(baseColor, 0))
     }
