@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnLayout
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.base.BaseBottomSheetDialogFragment
@@ -29,6 +30,7 @@ import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.book.read.ReaderBottomBarAction
 import io.legado.app.ui.book.read.ReaderFloatingBottomBar
 import io.legado.app.ui.book.read.ReadBookActivity
+import io.legado.app.ui.book.read.captureBackdropBitmap
 import io.legado.app.ui.theme.AppTheme
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
@@ -36,7 +38,6 @@ import io.legado.app.utils.themeColor
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import io.legado.app.utils.visible
-import io.legado.app.ui.book.read.captureBackdropBitmap
 
 
 class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud) {
@@ -48,6 +49,9 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     override fun onStart() {
         super.onStart()
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        (dialog as? BottomSheetDialog)
+            ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            ?.background = ColorDrawable(Color.TRANSPARENT)
 //        dialog?.window?.run {
 //            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 //            setBackgroundDrawableResource(R.color.background)
@@ -111,8 +115,13 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         actionBarCompose.doOnLayout {
             if (!actionBarReady) {
                 actionBarReady = true
-                renderActionBar(pendingPlayState)
-                actionBarCompose.animate().alpha(1f).setDuration(80L).start()
+                actionBarCompose.post {
+                    renderActionBar(pendingPlayState)
+                    actionBarCompose.animate().alpha(1f).setDuration(80L).start()
+                    actionBarCompose.postDelayed({
+                        renderActionBar(pendingPlayState)
+                    }, 160L)
+                }
             }
         }
         upPlayState()

@@ -235,6 +235,9 @@ class ReadMenu @JvmOverloads constructor(
         binding.bottomViewCompose.post {
             val allButtons = getUserButtons()
             renderButtons(allButtons)
+            binding.bottomViewCompose.post {
+                renderBottomBar()
+            }
         }
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
