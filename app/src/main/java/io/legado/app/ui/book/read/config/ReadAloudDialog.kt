@@ -29,7 +29,6 @@ import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.book.read.ReaderBottomBarAction
 import io.legado.app.ui.book.read.ReaderFloatingBottomBar
 import io.legado.app.ui.book.read.ReadBookActivity
-import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.theme.AppTheme
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
@@ -37,6 +36,7 @@ import io.legado.app.utils.themeColor
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import io.legado.app.utils.visible
+import io.legado.app.ui.book.read.captureBackdropBitmap
 
 
 class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud) {
@@ -218,10 +218,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     private fun initPanelStyle() = binding.run {
         val surface = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
-        val controlColor = ColorUtils.setAlphaComponent(
-            surface,
-            (ThemeConfig.bottomBarBlurAlpha.coerceIn(0, 100) / 100f * 255).toInt()
-        )
+        val controlColor = ColorUtils.setAlphaComponent(surface, 238)
         rootView.setBackgroundColor(Color.TRANSPARENT)
         controlPanel.setCardBackgroundColor(controlColor)
         actionPanel.setCardBackgroundColor(Color.TRANSPARENT)
@@ -276,6 +273,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     }
 
     private fun renderActionBar(isPlaying: Boolean = !BaseReadAloudService.pause) {
+        val backdropImage = binding.actionBarCompose.captureBackdropBitmap()
         val playPauseLabel = getString(if (isPlaying) R.string.pause else R.string.audio_play)
         val actions = listOf(
             ReaderBottomBarAction(
@@ -311,6 +309,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
                 ReaderFloatingBottomBar(
                     actions = actions,
                     selectedIndex = 2,
+                    backdropImage = backdropImage,
                     modifier = Modifier.padding(
                         start = 0.dp,
                         top = 4.dp,

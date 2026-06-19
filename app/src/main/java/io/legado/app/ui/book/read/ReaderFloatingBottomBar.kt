@@ -3,6 +3,7 @@ package io.legado.app.ui.book.read
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +62,7 @@ fun readerFloatingBottomBarConfig(): FloatingBottomBarConfig {
 fun ReaderFloatingBottomBar(
     actions: List<ReaderBottomBarAction>,
     selectedIndex: Int,
+    backdropImage: ImageBitmap?,
     modifier: Modifier = Modifier,
     showLabel: Boolean = true
 ) {
@@ -77,7 +80,15 @@ fun ReaderFloatingBottomBar(
                 modifier = Modifier
                     .matchParentSize()
                     .layerBackdrop(backdrop)
-            )
+            ) {
+                if (backdropImage != null) {
+                    Image(
+                        bitmap = backdropImage,
+                        contentDescription = null,
+                        modifier = Modifier.matchParentSize()
+                    )
+                }
+            }
             FloatingBottomBar(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 selectedIndex = { safeSelectedIndex },

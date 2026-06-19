@@ -40,7 +40,6 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.source.getSourceType
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.model.ReadBook
-import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.browser.WebViewActivity
 import io.legado.app.ui.theme.AppTheme
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
@@ -237,10 +236,6 @@ class ReadMenu @JvmOverloads constructor(
             val allButtons = getUserButtons()
             renderButtons(allButtons)
         }
-        val glassBgColor = ColorUtils.setAlphaComponent(
-            bgColor,
-            (ThemeConfig.bottomBarBlurAlpha.coerceIn(0, 100) / 100f * 255).toInt()
-        )
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
         applyBottomBarStyle()
@@ -252,7 +247,7 @@ class ReadMenu @JvmOverloads constructor(
         seekReadPage.thumbTintList = ColorStateList.valueOf(acColor)
         seekReadPage.tickActiveTintList = ColorStateList.valueOf(bgColor)
         seekReadPage.tickInactiveTintList = ColorStateList.valueOf(acColor)
-        sliderPanel?.setCardBackgroundColor(glassBgColor)
+        sliderPanel?.setCardBackgroundColor(alphaBgColor)
         sliderPanel?.cardElevation = 6f.dpToPx()
         sliderPanel?.radius = 24f.dpToPx()
         cdSlider.setCardBackgroundColor(ColorUtils.setAlphaComponent(bgcColor, (255 * 0.75f).toInt()))
@@ -588,6 +583,7 @@ class ReadMenu @JvmOverloads constructor(
     private fun renderBottomBar() {
         val buttons = buttonMap.values.toList()
         if (buttons.isEmpty()) return
+        val backdropImage = binding.bottomViewCompose.captureBackdropBitmap()
         val selectedIndex = buttons.indexOfFirst { it.state }.takeIf { it >= 0 }
             ?: buttons.indexOfFirst { it.id == "read_aloud" }.takeIf { it >= 0 }
             ?: buttons.indices.last / 2
@@ -615,6 +611,7 @@ class ReadMenu @JvmOverloads constructor(
                 ReaderFloatingBottomBar(
                     actions = actions,
                     selectedIndex = selectedIndex,
+                    backdropImage = backdropImage,
                     modifier = Modifier.padding(
                         start = 8.dp,
                         top = 4.dp,
