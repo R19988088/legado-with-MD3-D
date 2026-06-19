@@ -32,7 +32,6 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.capsule.ContinuousCapsule
 import io.legado.app.ui.config.themeConfig.ThemeConfig
-import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.FloatingBottomBar
 import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import io.legado.app.ui.widget.components.LocalFloatingBottomBarTabScale
@@ -49,7 +48,7 @@ data class ReaderBottomBarAction(
 
 fun readerFloatingBottomBarConfig(): FloatingBottomBarConfig {
     return FloatingBottomBarConfig.resolve(
-        useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
+        useFloatingBottomBar = true,
         useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
         blurRadius = ThemeConfig.bottomBarBlurRadius,
         blurAlpha = ThemeConfig.bottomBarBlurAlpha,
@@ -66,15 +65,7 @@ fun ReaderFloatingBottomBar(
 ) {
     if (actions.isEmpty()) return
     val safeSelectedIndex = selectedIndex.coerceIn(actions.indices)
-    val surfaceColor = if (ThemeConfig.enableDeepPersonalization && ThemeConfig.secondaryThemeColor != 0) {
-        Color(ThemeConfig.secondaryThemeColor)
-    } else {
-        LegadoTheme.colorScheme.surface
-    }
-    val backdrop = rememberLayerBackdrop {
-        drawRect(surfaceColor)
-        drawContent()
-    }
+    val backdrop = rememberLayerBackdrop()
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter

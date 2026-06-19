@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.doOnLayout
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.base.BaseBottomSheetDialogFragment
@@ -28,6 +29,7 @@ import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.book.read.ReaderBottomBarAction
 import io.legado.app.ui.book.read.ReaderFloatingBottomBar
 import io.legado.app.ui.book.read.ReadBookActivity
+import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.theme.AppTheme
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
@@ -40,6 +42,8 @@ import io.legado.app.utils.visible
 class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud) {
     private val callBack: CallBack? get() = activity as? CallBack
     private val binding by viewBinding(DialogReadAloudBinding::bind)
+    private var actionBarReady = false
+    private var pendingPlayState = !BaseReadAloudService.pause
 
     override fun onStart() {
         super.onStart()
@@ -103,6 +107,14 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         actionBarCompose.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
+        actionBarCompose.alpha = 0f
+        actionBarCompose.doOnLayout {
+            if (!actionBarReady) {
+                actionBarReady = true
+                renderActionBar(pendingPlayState)
+                actionBarCompose.animate().alpha(1f).setDuration(80L).start()
+            }
+        }
         upPlayState()
         upTimerText(BaseReadAloudService.timeMinute)
         cbTtsFollowSys.isChecked = requireContext().getPrefBoolean("ttsFollowSys", true)
@@ -206,7 +218,10 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     private fun initPanelStyle() = binding.run {
         val surface = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
-        val controlColor = ColorUtils.setAlphaComponent(surface, 238)
+        val controlColor = ColorUtils.setAlphaComponent(
+            surface,
+            (ThemeConfig.bottomBarBlurAlpha.coerceIn(0, 100) / 100f * 255).toInt()
+        )
         rootView.setBackgroundColor(Color.TRANSPARENT)
         controlPanel.setCardBackgroundColor(controlColor)
         actionPanel.setCardBackgroundColor(Color.TRANSPARENT)
@@ -226,6 +241,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     private fun upPlayState() {
         val isPlaying = !BaseReadAloudService.pause
+        pendingPlayState = isPlaying
         if (!BaseReadAloudService.pause) {
             binding.ivPlayPause.icon =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_pause)
@@ -249,7 +265,9 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         binding.llToBackstage.contentDescription = binding.ivToBackstage.contentDescription
         val tint = ColorStateList.valueOf(requireContext().themeColor(androidx.appcompat.R.attr.colorPrimary))
         binding.ivToBackstage.iconTint = tint
-        renderActionBar(isPlaying)
+        if (actionBarReady) {
+            renderActionBar(isPlaying)
+        }
 
         // val bg = requireContext().bottomBackground
         // val isLight = ColorUtils.isColorLight(bg)
