@@ -197,18 +197,23 @@
                 android:layout_weight="1"/>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/bottom_view_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:cardBackgroundColor="?attr/colorSurfaceContainer"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp"
                 app:strokeWidth="0dp">
+
                 <com.google.android.material.button.MaterialButtonGroup
                     android:id="@+id/bottom_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
                     android:gravity="center"
-                    app:overflowMode="menu"
-                    android:paddingVertical="8dp"
                     android:paddingHorizontal="16dp"
-                    android:background="?attr/colorSurfaceContainer" />
+                    android:paddingVertical="8dp"
+                    app:overflowMode="menu" />
             </com.google.android.material.card.MaterialCardView>
 
             <View

@@ -42,8 +42,8 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.source.getSourceType
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.model.ReadBook
-import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.browser.WebViewActivity
+import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 import io.legado.app.utils.ConstraintModify
@@ -238,7 +238,7 @@ class ReadMenu @JvmOverloads constructor(
         }
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
-        applyBottomBarStyle(bgColor)
+        applyBottomViewStyle(bgColor)
         (tvPre.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         (tvNext.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         cdSlider.setCardBackgroundColor(alphaBgColor)
@@ -264,12 +264,11 @@ class ReadMenu @JvmOverloads constructor(
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.bottomMenu.applyNavigationBarPadding()
         } else {
-            binding.bottomViewCard?.applyNavigationBarMargin(withInitialMargin = true)
+            binding.bottomViewCard.applyNavigationBarMargin(withInitialMargin = true)
         }
     }
 
-    private fun applyBottomBarStyle(baseColor: Int) = binding.run {
-        val bottomViewCard = bottomViewCard ?: return@run
+    private fun applyBottomViewStyle(baseColor: Int) = binding.run {
         val config = FloatingBottomBarConfig.resolve(
             useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
             useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
@@ -277,24 +276,31 @@ class ReadMenu @JvmOverloads constructor(
             blurAlpha = ThemeConfig.bottomBarBlurAlpha,
             lensRadius = ThemeConfig.bottomBarLensRadius
         )
-        val style = ReadMenuBottomBarStyle.resolve(
-            config = config,
-            baseColor = baseColor,
-            menuAlpha = AppConfig.menuAlpha
+        val alphaPercent = if (config.liquidGlass) {
+            config.blurAlpha
+        } else {
+            AppConfig.menuAlpha.coerceIn(0, 100)
+        }
+        val backgroundColor = ColorUtils.setAlphaComponent(
+            baseColor,
+            (alphaPercent / 100f * 255).toInt()
         )
-        val horizontalMargin = style.horizontalMarginDp.dpToPx()
-        val bottomMargin = style.bottomMarginDp.dpToPx()
+        val horizontalMargin = if (config.floating) 16.dpToPx() else 0
+        val bottomMargin = if (config.floating) 12.dpToPx() else 0
         (bottomViewCard.layoutParams as? ViewGroup.MarginLayoutParams)?.let { params ->
             params.leftMargin = horizontalMargin
             params.rightMargin = horizontalMargin
             params.bottomMargin = bottomMargin
             bottomViewCard.layoutParams = params
         }
-        bottomViewCard.radius = style.cornerRadiusDp.dpToPx()
-        bottomViewCard.cardElevation = style.elevationDp.dpToPx()
-        bottomViewCard.strokeWidth = style.strokeWidthDp.dpToPx()
-        bottomViewCard.strokeColor = style.strokeColor
-        bottomViewCard.setCardBackgroundColor(style.backgroundColor)
+        bottomViewCard.radius = if (config.floating) 36F.dpToPx() else 0f
+        bottomViewCard.cardElevation = if (config.liquidGlass) 10F.dpToPx() else if (config.floating) 8F.dpToPx() else 0f
+        bottomViewCard.strokeWidth = if (config.liquidGlass) 1.dpToPx() else 0
+        bottomViewCard.strokeColor = ColorUtils.setAlphaComponent(
+            baseColor,
+            if (config.liquidGlass) 72 else 0
+        )
+        bottomViewCard.setCardBackgroundColor(backgroundColor)
         bottomView.setBackgroundColor(ColorUtils.setAlphaComponent(baseColor, 0))
     }
 

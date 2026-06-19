@@ -4,13 +4,9 @@ package io.legado.app.ui.book.read.config
 //import io.legado.app.lib.theme.getPrimaryTextColor
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.base.BaseBottomSheetDialogFragment
@@ -21,14 +17,9 @@ import io.legado.app.lib.dialogs.selector
 import io.legado.app.model.ReadAloud
 import io.legado.app.model.ReadBook
 import io.legado.app.service.BaseReadAloudService
-import io.legado.app.ui.book.read.ReadMenuBottomBarStyle
 import io.legado.app.ui.book.read.ReadBookActivity
-import io.legado.app.ui.config.themeConfig.ThemeConfig
-import io.legado.app.ui.widget.components.FloatingBottomBarConfig
-import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
-import io.legado.app.utils.themeColor
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import io.legado.app.utils.visible
@@ -40,10 +31,6 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        (dialog as? BottomSheetDialog)
-            ?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            ?.background = ColorDrawable(Color.TRANSPARENT)
 //        dialog?.window?.run {
 //            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 //            setBackgroundDrawableResource(R.color.background)
@@ -95,38 +82,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 //            cbTtsFollowSys.setTextColor(textColor)
         }
         initData()
-        initPanelStyle()
         initEvent()
-    }
-
-    private fun initPanelStyle() = binding.run {
-        rootView.setBackgroundColor(Color.TRANSPARENT)
-        val baseColor = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
-        val config = FloatingBottomBarConfig.resolve(
-            useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
-            useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
-            blurRadius = ThemeConfig.bottomBarBlurRadius,
-            blurAlpha = ThemeConfig.bottomBarBlurAlpha,
-            lensRadius = ThemeConfig.bottomBarLensRadius
-        )
-        val style = ReadMenuBottomBarStyle.resolve(
-            config = config,
-            baseColor = baseColor,
-            menuAlpha = AppConfig.menuAlpha
-        )
-        applyPanelStyle(controlPanel, style)
-        applyPanelStyle(actionPanel, style)
-    }
-
-    private fun applyPanelStyle(
-        panel: MaterialCardView,
-        style: ReadMenuBottomBarStyle
-    ) {
-        panel.radius = style.cornerRadiusDp.dpToPx()
-        panel.cardElevation = style.elevationDp.dpToPx()
-        panel.strokeWidth = style.strokeWidthDp.dpToPx()
-        panel.strokeColor = style.strokeColor
-        panel.setCardBackgroundColor(style.backgroundColor)
     }
 
     private fun initData() = binding.run {
