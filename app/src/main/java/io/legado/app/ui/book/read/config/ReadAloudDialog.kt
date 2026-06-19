@@ -4,9 +4,13 @@ package io.legado.app.ui.book.read.config
 //import io.legado.app.lib.theme.getPrimaryTextColor
 import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.base.BaseBottomSheetDialogFragment
@@ -20,6 +24,7 @@ import io.legado.app.service.BaseReadAloudService
 import io.legado.app.ui.book.read.ReadBookActivity
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
+import io.legado.app.utils.themeColor
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.viewbindingdelegate.viewBinding
 import io.legado.app.utils.visible
@@ -31,6 +36,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     override fun onStart() {
         super.onStart()
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 //        dialog?.window?.run {
 //            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 //            setBackgroundDrawableResource(R.color.background)
@@ -82,6 +88,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 //            cbTtsFollowSys.setTextColor(textColor)
         }
         initData()
+        initPanelStyle()
         initEvent()
     }
 
@@ -111,7 +118,8 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         ivPlayPrev.setOnClickListener { ReadAloud.prevParagraph(requireContext()) }
         ivPlayNext.setOnClickListener { ReadAloud.nextParagraph(requireContext()) }
         ivCatalog.setOnClickListener { callBack?.openChapterList() }
-        ivToBackstage.setOnClickListener { callBack?.finish() }
+        ivToBackstage.setOnClickListener { callBack?.onClickReadAloud() }
+        llToBackstage.setOnClickListener { callBack?.onClickReadAloud() }
         cbTtsFollowSys.setOnCheckedChangeListener { _, isChecked ->
             AppConfig.ttsFlowSys = isChecked
             upTtsSpeechRateEnabled(!isChecked)
@@ -186,6 +194,15 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     }
 
+    private fun initPanelStyle() = binding.run {
+        val surface = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
+        val controlColor = ColorUtils.setAlphaComponent(surface, 238)
+        val actionColor = ColorUtils.setAlphaComponent(surface, 218)
+        rootView.setBackgroundColor(Color.TRANSPARENT)
+        controlPanel.setCardBackgroundColor(controlColor)
+        actionPanel.setCardBackgroundColor(actionColor)
+    }
+
     private fun upTtsSpeechRateEnabled(enabled: Boolean) {
         binding.run {
             upTtsSpeechRateText(AppConfig.ttsSpeechRate)
@@ -197,15 +214,30 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     }
 
     private fun upPlayState() {
+        val isPlaying = !BaseReadAloudService.pause
         if (!BaseReadAloudService.pause) {
             binding.ivPlayPause.icon =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_pause)
             binding.ivPlayPause.contentDescription = getString(R.string.pause)
+            binding.ivPlayPause.tooltipText = getString(R.string.pause)
         } else {
             binding.ivPlayPause.icon =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_play)
             binding.ivPlayPause.contentDescription = getString(R.string.audio_play)
+            binding.ivPlayPause.tooltipText = getString(R.string.audio_play)
         }
+        binding.ivToBackstage.icon = ContextCompat.getDrawable(
+            requireContext(),
+            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+        )
+        binding.ivToBackstage.contentDescription = getString(
+            if (isPlaying) R.string.pause else R.string.audio_play
+        )
+        binding.ivToBackstage.tooltipText = binding.ivToBackstage.contentDescription
+        binding.tvToBackstage.text = getString(if (isPlaying) R.string.pause else R.string.audio_play)
+        binding.llToBackstage.contentDescription = binding.ivToBackstage.contentDescription
+        val tint = ColorStateList.valueOf(requireContext().themeColor(androidx.appcompat.R.attr.colorPrimary))
+        binding.ivToBackstage.iconTint = tint
 
         // val bg = requireContext().bottomBackground
         // val isLight = ColorUtils.isColorLight(bg)

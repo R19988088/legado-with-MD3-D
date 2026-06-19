@@ -238,6 +238,7 @@ class ReadMenu @JvmOverloads constructor(
         }
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
+        bottomView.setBackgroundColor(alphaBgColor)
         applyBottomBarStyle(bgColor)
         (tvPre.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         (tvNext.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
@@ -247,6 +248,10 @@ class ReadMenu @JvmOverloads constructor(
         seekReadPage.thumbTintList = ColorStateList.valueOf(acColor)
         seekReadPage.tickActiveTintList = ColorStateList.valueOf(bgColor)
         seekReadPage.tickInactiveTintList = ColorStateList.valueOf(acColor)
+        sliderPanel.setCardBackgroundColor(alphaBgColor)
+        sliderPanel.cardElevation = 6f.dpToPx()
+        sliderPanel.radius = 24f.dpToPx()
+        cdSlider.setCardBackgroundColor(ColorUtils.setAlphaComponent(bgcColor, (255 * 0.75f).toInt()))
         tvPre.iconTint = ColorStateList.valueOf(acColor)
         tvNext.iconTint = ColorStateList.valueOf(acColor)
         tvBookName.setTextColor(acColor)
@@ -278,7 +283,7 @@ class ReadMenu @JvmOverloads constructor(
             lensRadius = ThemeConfig.bottomBarLensRadius
         )
         val style = ReadMenuBottomBarStyle.resolve(
-            config = config,
+            config = config.copy(floating = true),
             baseColor = baseColor,
             menuAlpha = AppConfig.menuAlpha
         )
@@ -290,8 +295,8 @@ class ReadMenu @JvmOverloads constructor(
             params.bottomMargin = bottomMargin
             bottomViewCard.layoutParams = params
         }
-        bottomViewCard.radius = style.cornerRadiusDp.dpToPx()
-        bottomViewCard.cardElevation = style.elevationDp.dpToPx()
+        bottomViewCard.radius = 28f.dpToPx()
+        bottomViewCard.cardElevation = style.elevationDp.coerceAtLeast(8f).dpToPx()
         bottomViewCard.strokeWidth = style.strokeWidthDp.dpToPx()
         bottomViewCard.strokeColor = style.strokeColor
         bottomViewCard.setCardBackgroundColor(style.backgroundColor)
@@ -532,6 +537,7 @@ class ReadMenu @JvmOverloads constructor(
         when (AppConfig.readSliderMode) {
             "0" -> {
                 binding.llSlider.gravity = Gravity.CENTER
+                binding.sliderPanel.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = true
@@ -540,6 +546,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "1" -> {
                 binding.llSlider.gravity = Gravity.CENTER
+                binding.sliderPanel.isVisible = false
                 binding.llSlider.isVisible = false
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = false
@@ -548,6 +555,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "2" -> {
                 binding.llSlider.gravity = Gravity.START
+                binding.sliderPanel.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = true
@@ -556,6 +564,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "3" -> {
                 binding.llSlider.gravity = Gravity.END
+                binding.sliderPanel.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = true
@@ -564,6 +573,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "4" -> {
                 binding.llSlider.gravity = Gravity.CENTER
+                binding.sliderPanel.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = false
@@ -571,6 +581,7 @@ class ReadMenu @JvmOverloads constructor(
             }
 
             else -> {
+                binding.sliderPanel.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = true
