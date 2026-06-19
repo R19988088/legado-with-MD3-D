@@ -126,16 +126,16 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <io.legado.app.ui.widget.LiquidGlassLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/slider_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="8dp"
             android:layout_marginHorizontal="16dp"
-            android:elevation="8dp"
-            app:liquidCornerRadius="24dp"
-            app:liquidPanelAlpha="48"
-            app:liquidStrokeAlpha="112">
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="6dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:id="@+id/ll_slider"
@@ -187,18 +187,18 @@
                     tools:ignore="TouchTargetSizeCheck"/>
             </LinearLayout>
 
-        </io.legado.app.ui.widget.LiquidGlassLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <io.legado.app.ui.widget.LiquidGlassLayout
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/bottom_view_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="12dp"
-            android:elevation="10dp"
-            app:liquidCornerRadius="28dp"
-            app:liquidPanelAlpha="46"
-            app:liquidStrokeAlpha="112">
+            app:cardBackgroundColor="?attr/colorSurfaceContainer"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp">
 
             <com.google.android.material.button.MaterialButtonGroup
                 android:id="@+id/bottom_view"
@@ -209,7 +209,7 @@
                 android:paddingVertical="8dp"
                 android:paddingHorizontal="16dp" />
 
-        </io.legado.app.ui.widget.LiquidGlassLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

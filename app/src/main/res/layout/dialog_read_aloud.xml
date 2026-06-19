@@ -9,15 +9,14 @@
     android:paddingHorizontal="16dp"
     android:paddingBottom="8dp">
 
-    <io.legado.app.ui.widget.LiquidGlassLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/control_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:elevation="8dp"
-        app:liquidCornerRadius="32dp"
-        app:liquidPanelAlpha="62"
-        app:liquidStrokeAlpha="118">
+        app:cardCornerRadius="32dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -259,16 +258,15 @@
 
         </LinearLayout>
 
-    </io.legado.app.ui.widget.LiquidGlassLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-    <io.legado.app.ui.widget.LiquidGlassLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/action_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="6dp"
-        app:liquidCornerRadius="24dp"
-        app:liquidPanelAlpha="50"
-        app:liquidStrokeAlpha="112">
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:strokeWidth="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -421,6 +419,6 @@
 
         </LinearLayout>
 
-    </io.legado.app.ui.widget.LiquidGlassLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
