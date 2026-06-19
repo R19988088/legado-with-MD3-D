@@ -9,6 +9,9 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.google.android.material.slider.Slider
@@ -21,7 +24,10 @@ import io.legado.app.lib.dialogs.selector
 import io.legado.app.model.ReadAloud
 import io.legado.app.model.ReadBook
 import io.legado.app.service.BaseReadAloudService
+import io.legado.app.ui.book.read.ReaderBottomBarAction
+import io.legado.app.ui.book.read.ReaderFloatingBottomBar
 import io.legado.app.ui.book.read.ReadBookActivity
+import io.legado.app.ui.theme.AppTheme
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
 import io.legado.app.utils.themeColor
@@ -93,6 +99,9 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     }
 
     private fun initData() = binding.run {
+        actionBarCompose.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
         upPlayState()
         upTimerText(BaseReadAloudService.timeMinute)
         cbTtsFollowSys.isChecked = requireContext().getPrefBoolean("ttsFollowSys", true)
@@ -197,10 +206,11 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     private fun initPanelStyle() = binding.run {
         val surface = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
         val controlColor = ColorUtils.setAlphaComponent(surface, 238)
-        val actionColor = ColorUtils.setAlphaComponent(surface, 218)
         rootView.setBackgroundColor(Color.TRANSPARENT)
         controlPanel.setCardBackgroundColor(controlColor)
-        actionPanel.setCardBackgroundColor(actionColor)
+        actionPanel.setCardBackgroundColor(Color.TRANSPARENT)
+        actionPanel.cardElevation = 0f
+        actionPanel.strokeWidth = 0
     }
 
     private fun upTtsSpeechRateEnabled(enabled: Boolean) {
@@ -238,11 +248,59 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         binding.llToBackstage.contentDescription = binding.ivToBackstage.contentDescription
         val tint = ColorStateList.valueOf(requireContext().themeColor(androidx.appcompat.R.attr.colorPrimary))
         binding.ivToBackstage.iconTint = tint
+        renderActionBar(isPlaying)
 
         // val bg = requireContext().bottomBackground
         // val isLight = ColorUtils.isColorLight(bg)
         // val textColor = requireContext().getPrimaryTextColor(isLight)
         // binding.ivPlayPause.iconTint = ColorStateList.valueOf(textColor)
+    }
+
+    private fun renderActionBar(isPlaying: Boolean = !BaseReadAloudService.pause) {
+        val playPauseLabel = getString(if (isPlaying) R.string.pause else R.string.audio_play)
+        val actions = listOf(
+            ReaderBottomBarAction(
+                id = "catalog",
+                iconRes = R.drawable.ic_toc,
+                label = getString(R.string.chapter_list),
+                onClick = { callBack?.openChapterList() }
+            ),
+            ReaderBottomBarAction(
+                id = "main_menu",
+                iconRes = R.drawable.ic_menu,
+                label = getString(R.string.main_menu),
+                onClick = {
+                    callBack?.showMenuBar()
+                    dismissAllowingStateLoss()
+                }
+            ),
+            ReaderBottomBarAction(
+                id = "play_pause",
+                iconRes = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
+                label = playPauseLabel,
+                onClick = { callBack?.onClickReadAloud() }
+            ),
+            ReaderBottomBarAction(
+                id = "setting",
+                iconRes = R.drawable.ic_settings,
+                label = getString(R.string.setting),
+                onClick = { ReadAloudConfigDialog().show(childFragmentManager, "readAloudConfigDialog") }
+            )
+        )
+        binding.actionBarCompose.setContent {
+            AppTheme {
+                ReaderFloatingBottomBar(
+                    actions = actions,
+                    selectedIndex = 2,
+                    modifier = Modifier.padding(
+                        start = 0.dp,
+                        top = 4.dp,
+                        end = 0.dp,
+                        bottom = 8.dp
+                    )
+                )
+            }
+        }
     }
 
     private fun upSeekTimer() {

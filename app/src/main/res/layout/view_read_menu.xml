@@ -195,19 +195,17 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="12dp"
+            android:background="@android:color/transparent"
             app:cardBackgroundColor="?attr/colorSurfaceContainer"
             app:cardCornerRadius="28dp"
             app:cardElevation="8dp"
             app:strokeWidth="0dp">
 
-            <com.google.android.material.button.MaterialButtonGroup
-                android:id="@+id/bottom_view"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/bottom_view_compose"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                app:overflowMode="menu"
-                android:paddingVertical="8dp"
-                android:paddingHorizontal="16dp" />
+                android:minHeight="80dp" />
 
         </com.google.android.material.card.MaterialCardView>
 
