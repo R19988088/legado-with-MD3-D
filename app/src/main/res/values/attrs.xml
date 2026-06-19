@@ -207,6 +207,13 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="LiquidGlassLayout">
+        <attr name="liquidCornerRadius" format="dimension" />
+        <attr name="liquidBlurRadius" format="integer" />
+        <attr name="liquidPanelAlpha" format="integer" />
+        <attr name="liquidStrokeAlpha" format="integer" />
+    </declare-styleable>
+
     <declare-styleable name="ThemeRadioNoButton">
         <attr name="isBottomBackground" />
     </declare-styleable>

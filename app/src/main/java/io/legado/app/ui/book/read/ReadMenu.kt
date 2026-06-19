@@ -248,9 +248,11 @@ class ReadMenu @JvmOverloads constructor(
         seekReadPage.thumbTintList = ColorStateList.valueOf(acColor)
         seekReadPage.tickActiveTintList = ColorStateList.valueOf(bgColor)
         seekReadPage.tickInactiveTintList = ColorStateList.valueOf(acColor)
-        sliderPanel?.setCardBackgroundColor(alphaBgColor)
-        sliderPanel?.cardElevation = 6f.dpToPx()
-        sliderPanel?.radius = 24f.dpToPx()
+        sliderPanel?.apply {
+            panelAlpha = if (ThemeConfig.useFloatingBottomBarLiquidGlass) 48 else AppConfig.menuAlpha
+            blurRadius = ThemeConfig.bottomBarBlurRadius.coerceAtLeast(16)
+            refreshGlass()
+        }
         cdSlider.setCardBackgroundColor(ColorUtils.setAlphaComponent(bgcColor, (255 * 0.75f).toInt()))
         tvPre.iconTint = ColorStateList.valueOf(acColor)
         tvNext.iconTint = ColorStateList.valueOf(acColor)
@@ -295,11 +297,22 @@ class ReadMenu @JvmOverloads constructor(
             params.bottomMargin = bottomMargin
             bottomViewCard.layoutParams = params
         }
-        bottomViewCard.radius = 28f.dpToPx()
-        bottomViewCard.cardElevation = style.elevationDp.coerceAtLeast(8f).dpToPx()
-        bottomViewCard.strokeWidth = style.strokeWidthDp.dpToPx()
-        bottomViewCard.strokeColor = style.strokeColor
-        bottomViewCard.setCardBackgroundColor(style.backgroundColor)
+        bottomViewCard.apply {
+            cornerRadiusPx = 28f.dpToPx()
+            elevation = style.elevationDp.coerceAtLeast(8f).dpToPx()
+            panelAlpha = if (style.liquidGlass) {
+                ((style.backgroundColor ushr 24) * 100 / 255)
+            } else {
+                AppConfig.menuAlpha
+            }
+            strokeAlpha = if (style.liquidGlass) {
+                style.strokeColor ushr 24
+            } else {
+                0
+            }
+            blurRadius = config.blurRadius.coerceAtLeast(16)
+            refreshGlass()
+        }
         bottomView.setBackgroundColor(ColorUtils.setAlphaComponent(baseColor, 0))
     }
 
@@ -364,6 +377,8 @@ class ReadMenu @JvmOverloads constructor(
         updateToolBarColor()
         changeReplace(ReadBook.book?.getUseReplaceRule() ?: false)
         updateBadge("replace_badge", ReadBook.curTextChapter?.effectiveReplaceRules?.size ?: 0)
+        binding.sliderPanel?.refreshGlass()
+        binding.bottomViewCard?.refreshGlass()
         if (anim) {
             binding.titleBar.startAnimation(menuTopIn)
             binding.bottomMenu.startAnimation(menuBottomIn)

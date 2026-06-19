@@ -10,7 +10,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.base.BaseBottomSheetDialogFragment
@@ -195,12 +194,13 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     }
 
     private fun initPanelStyle() = binding.run {
-        val surface = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
-        val controlColor = ColorUtils.setAlphaComponent(surface, 238)
-        val actionColor = ColorUtils.setAlphaComponent(surface, 218)
         rootView.setBackgroundColor(Color.TRANSPARENT)
-        controlPanel.setCardBackgroundColor(controlColor)
-        actionPanel.setCardBackgroundColor(actionColor)
+        controlPanel.panelAlpha = 62
+        controlPanel.strokeAlpha = 118
+        actionPanel.panelAlpha = 50
+        actionPanel.strokeAlpha = 112
+        controlPanel.refreshGlass()
+        actionPanel.refreshGlass()
     }
 
     private fun upTtsSpeechRateEnabled(enabled: Boolean) {
