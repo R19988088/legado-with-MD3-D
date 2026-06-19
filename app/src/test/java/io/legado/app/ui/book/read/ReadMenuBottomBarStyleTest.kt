@@ -34,7 +34,7 @@ class ReadMenuBottomBarStyleTest {
 
         assertTrue(style.floating)
         assertFalse(style.liquidGlass)
-        assertEquals(32f, style.cornerRadiusDp)
+        assertEquals(36f, style.cornerRadiusDp)
         assertEquals(16, style.horizontalMarginDp)
         assertEquals(12, style.bottomMarginDp)
         assertEquals(0, alpha(style.strokeColor))
@@ -52,8 +52,8 @@ class ReadMenuBottomBarStyleTest {
         assertTrue(style.liquidGlass)
         assertEquals((40 / 100f * 255).toInt(), alpha(style.backgroundColor))
         assertEquals(1, style.strokeWidthDp)
-        assertEquals(90, alpha(style.strokeColor))
-        assertEquals(12f, style.elevationDp)
+        assertEquals(72, alpha(style.strokeColor))
+        assertEquals(10f, style.elevationDp)
     }
 
     @Test

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
@@ -16,10 +15,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.SeekBar
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
+import androidx.annotation.OptIn
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
@@ -28,6 +24,12 @@ import androidx.core.view.doOnAttach
 import androidx.core.view.forEach
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
+import com.google.android.material.badge.ExperimentalBadgeUtils
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonGroup
+import com.google.android.material.overflow.OverflowLinearLayout
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.constant.PreferKey
@@ -40,8 +42,9 @@ import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.source.getSourceType
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.model.ReadBook
+import io.legado.app.ui.config.themeConfig.ThemeConfig
 import io.legado.app.ui.browser.WebViewActivity
-import io.legado.app.ui.theme.AppTheme
+import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import io.legado.app.ui.widget.seekbar.SeekBarChangeListener
 import io.legado.app.utils.ConstraintModify
 import io.legado.app.utils.activity
@@ -229,19 +232,13 @@ class ReadMenu @JvmOverloads constructor(
         } else {
             titleBarAddition.gone()
         }
-        binding.bottomViewCompose.setViewCompositionStrategy(
-            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
-        )
-        binding.bottomViewCompose.post {
+        binding.bottomView.post {
             val allButtons = getUserButtons()
-            renderButtons(allButtons)
-            binding.bottomViewCompose.post {
-                renderBottomBar()
-            }
+            renderButtons(binding.bottomView, allButtons)
         }
         titleBar.setBackgroundColor(alphaBgColor)
         titleBar.toolbar.setBackgroundColor(alphaBgColor)
-        applyBottomBarStyle()
+        applyBottomBarStyle(bgColor)
         (tvPre.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         (tvNext.background as? RippleDrawable)?.setColor(ColorStateList.valueOf(bgcColor))
         cdSlider.setCardBackgroundColor(alphaBgColor)
@@ -250,10 +247,6 @@ class ReadMenu @JvmOverloads constructor(
         seekReadPage.thumbTintList = ColorStateList.valueOf(acColor)
         seekReadPage.tickActiveTintList = ColorStateList.valueOf(bgColor)
         seekReadPage.tickInactiveTintList = ColorStateList.valueOf(acColor)
-        sliderPanel?.setCardBackgroundColor(alphaBgColor)
-        sliderPanel?.cardElevation = 6f.dpToPx()
-        sliderPanel?.radius = 24f.dpToPx()
-        cdSlider.setCardBackgroundColor(ColorUtils.setAlphaComponent(bgcColor, (255 * 0.75f).toInt()))
         tvPre.iconTint = ColorStateList.valueOf(acColor)
         tvNext.iconTint = ColorStateList.valueOf(acColor)
         tvBookName.setTextColor(acColor)
@@ -275,16 +268,34 @@ class ReadMenu @JvmOverloads constructor(
         }
     }
 
-    private fun applyBottomBarStyle() = binding.run {
+    private fun applyBottomBarStyle(baseColor: Int) = binding.run {
         val bottomViewCard = bottomViewCard ?: return@run
+        val config = FloatingBottomBarConfig.resolve(
+            useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
+            useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
+            blurRadius = ThemeConfig.bottomBarBlurRadius,
+            blurAlpha = ThemeConfig.bottomBarBlurAlpha,
+            lensRadius = ThemeConfig.bottomBarLensRadius
+        )
+        val style = ReadMenuBottomBarStyle.resolve(
+            config = config,
+            baseColor = baseColor,
+            menuAlpha = AppConfig.menuAlpha
+        )
+        val horizontalMargin = style.horizontalMarginDp.dpToPx()
+        val bottomMargin = style.bottomMarginDp.dpToPx()
         (bottomViewCard.layoutParams as? ViewGroup.MarginLayoutParams)?.let { params ->
-            params.bottomMargin = 0
+            params.leftMargin = horizontalMargin
+            params.rightMargin = horizontalMargin
+            params.bottomMargin = bottomMargin
             bottomViewCard.layoutParams = params
         }
-        bottomViewCard.radius = 0f
-        bottomViewCard.cardElevation = 0f
-        bottomViewCard.strokeWidth = 0
-        bottomViewCard.setCardBackgroundColor(Color.TRANSPARENT)
+        bottomViewCard.radius = style.cornerRadiusDp.dpToPx()
+        bottomViewCard.cardElevation = style.elevationDp.dpToPx()
+        bottomViewCard.strokeWidth = style.strokeWidthDp.dpToPx()
+        bottomViewCard.strokeColor = style.strokeColor
+        bottomViewCard.setCardBackgroundColor(style.backgroundColor)
+        bottomView.setBackgroundColor(ColorUtils.setAlphaComponent(baseColor, 0))
     }
 
     fun updateToolBarColor() {
@@ -521,7 +532,6 @@ class ReadMenu @JvmOverloads constructor(
         when (AppConfig.readSliderMode) {
             "0" -> {
                 binding.llSlider.gravity = Gravity.CENTER
-                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = true
@@ -530,7 +540,6 @@ class ReadMenu @JvmOverloads constructor(
 
             "1" -> {
                 binding.llSlider.gravity = Gravity.CENTER
-                binding.sliderPanel?.isVisible = false
                 binding.llSlider.isVisible = false
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = false
@@ -539,7 +548,6 @@ class ReadMenu @JvmOverloads constructor(
 
             "2" -> {
                 binding.llSlider.gravity = Gravity.START
-                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = true
@@ -548,7 +556,6 @@ class ReadMenu @JvmOverloads constructor(
 
             "3" -> {
                 binding.llSlider.gravity = Gravity.END
-                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = true
@@ -557,7 +564,6 @@ class ReadMenu @JvmOverloads constructor(
 
             "4" -> {
                 binding.llSlider.gravity = Gravity.CENTER
-                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = false
@@ -565,7 +571,6 @@ class ReadMenu @JvmOverloads constructor(
             }
 
             else -> {
-                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = true
@@ -574,65 +579,89 @@ class ReadMenu @JvmOverloads constructor(
         }
     }
 
-    private val buttonMap = mutableMapOf<String, ToolButton>()
-    private val badgeMap = mutableMapOf<String, Int>()
+    private val buttonMap = mutableMapOf<String, MaterialButton>()
 
-    fun renderButtons(buttons: List<ToolButton>) {
+    fun renderButtons(group: MaterialButtonGroup, buttons: List<ToolButton>) {
+        group.removeAllViews()
         buttonMap.clear()
-        buttons.forEach { buttonMap[it.id] = it }
-        renderBottomBar()
-    }
 
-    private fun renderBottomBar() {
-        val buttons = buttonMap.values.toList()
-        if (buttons.isEmpty()) return
-        val backdropImage = binding.bottomViewCompose.captureBackdropBitmap()
-        val selectedIndex = buttons.indexOfFirst { it.state }.takeIf { it >= 0 }
-            ?: buttons.indexOfFirst { it.id == "read_aloud" }.takeIf { it >= 0 }
-            ?: buttons.indices.last / 2
-        val actions = buttons.map { btn ->
-            ReaderBottomBarAction(
-                id = btn.id,
-                iconRes = btn.iconRes,
-                label = btn.description,
-                checked = btn.state,
-                badgeCount = badgeMap[btn.id] ?: 0,
-                onClick = {
-                    if (btn.onCheck != null) {
-                        btn.state = !btn.state
-                        btn.onCheck.invoke()
-                    } else {
-                        btn.onClick()
-                    }
-                    renderBottomBar()
-                },
-                onLongClick = btn.onLongClick
-            )
-        }
-        binding.bottomViewCompose.setContent {
-            AppTheme {
-                ReaderFloatingBottomBar(
-                    actions = actions,
-                    selectedIndex = selectedIndex,
-                    backdropImage = backdropImage,
-                    modifier = Modifier.padding(
-                        start = 8.dp,
-                        top = 4.dp,
-                        end = 8.dp,
-                        bottom = 8.dp
+        buttons.forEach { btn ->
+            val style = com.google.android.material.R.attr.materialIconButtonOutlinedStyle
+            val button = MaterialButton(group.context, null, style).apply {
+                id = btn.id.hashCode()
+                setIconResource(btn.iconRes)
+                contentDescription = btn.description
+                tooltipText = btn.description
+                strokeWidth = 0
+                iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
+                iconTint = ColorStateList.valueOf(acColor)
+                val bgColorState = ColorStateList(
+                    arrayOf(
+                        intArrayOf(android.R.attr.state_checked),
+                        intArrayOf(-android.R.attr.state_checked)
+                    ),
+                    intArrayOf(
+                        bgcColor,
+                        bgColor
                     )
                 )
+                backgroundTintList = bgColorState
+                maxLines = 1
+                if (btn.onCheck != null) {
+                    isCheckable = true
+                    isChecked = btn.state
+                    setOnClickListener {
+                        isChecked = !isChecked
+                        btn.state = isChecked
+                        btn.onCheck.invoke()
+                    }
+                } else {
+                    setOnClickListener { btn.onClick() }
+                }
+                btn.onLongClick?.let { longAction ->
+                    setOnLongClickListener {
+                        longAction()
+                        true
+                    }
+                }
             }
+            group.addView(
+                button,
+                OverflowLinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f)
+            )
+            val lp =
+                button.layoutParams as MaterialButtonGroup.LayoutParams
+            lp.overflowText = btn.description
+            buttonMap[btn.id] = button
         }
     }
 
+    private val badgeMap = mutableMapOf<MaterialButton, BadgeDrawable>()
+
+    @OptIn(ExperimentalBadgeUtils::class)
     fun updateBadge(id: String, count: Int) {
-        if (count != 0 && buttonMap[id]?.state == true) {
-            badgeMap[id] = count
+        val btn = buttonMap[id] ?: return
+        if (count != 0 && btn.isChecked) {
+            btn.addBadge(count)
         } else {
-            badgeMap.remove(id)
+            badgeMap[btn]?.let { BadgeUtils.detachBadgeDrawable(it, btn) }
+            badgeMap.remove(btn)
         }
-        renderBottomBar()
+    }
+
+    @OptIn(ExperimentalBadgeUtils::class)
+    private fun MaterialButton.addBadge(count: Int) {
+        val badgeDrawable = BadgeDrawable.create(context).apply {
+            number = count
+            backgroundColor = colorSecondary
+            badgeTextColor = colorSecondaryContainer
+            maxCharacterCount = 3
+            badgeGravity = BadgeDrawable.TOP_END
+            verticalOffset = (16).dpToPx()
+        }
+
+        BadgeUtils.attachBadgeDrawable(badgeDrawable, this, null)
+        badgeMap[this] = badgeDrawable
     }
 
 
@@ -676,9 +705,9 @@ class ReadMenu @JvmOverloads constructor(
                 onClick = {
                     AppConfig.isNightTheme = !AppConfig.isNightTheme
                     OldThemeConfig.applyDayNight(context)
-                    buttonMap["theme"]?.iconRes =
+                    buttonMap["theme"]?.setIconResource(
                         if (AppConfig.isNightTheme) R.drawable.ic_daytime else R.drawable.ic_brightness
-                    renderBottomBar()
+                    )
                 }
             ),
             ToolButton(
@@ -726,9 +755,8 @@ class ReadMenu @JvmOverloads constructor(
     }
 
     fun changeReplace(boolean: Boolean) {
-        buttonMap["replace"]?.state = boolean
-        buttonMap["replace_badge"]?.state = boolean
-        renderBottomBar()
+        buttonMap["replace"]?.isChecked = boolean
+        buttonMap["replace_badge"]?.isChecked = boolean
     }
 
     private fun getUserButtons(): List<ToolButton> {
@@ -765,19 +793,24 @@ class ReadMenu @JvmOverloads constructor(
 
     fun setAutoPage(autoPage: Boolean) {
         buttonMap["auto_page"]?.apply {
-            iconRes = if (autoPage) R.drawable.ic_auto_page_stop else R.drawable.ic_auto_page
-            description =
+            val icon = if (autoPage) R.drawable.ic_auto_page_stop else R.drawable.ic_auto_page
+            val desc =
                 context.getString(if (autoPage) R.string.auto_next_page_stop else R.string.auto_next_page)
+            setIconResource(icon)
+            contentDescription = desc
+            tooltipText = desc
         }
-        renderBottomBar()
     }
 
     fun updateTranslationButton(translationMode: Boolean) {
         val btn = buttonMap["translate"] ?: return
 
         // Update icon based on mode
-        btn.iconRes = if (translationMode) R.drawable.ic_return else R.drawable.ic_translate
-        renderBottomBar()
+        if (translationMode) {
+            btn.setIconResource(R.drawable.ic_return)
+        } else {
+            btn.setIconResource(R.drawable.ic_translate)
+        }
     }
 
     private fun initAnimation() {
@@ -939,8 +972,8 @@ class ReadMenu @JvmOverloads constructor(
 
     data class ToolButton(
         val id: String,             // 唯一标识
-        var iconRes: Int,           // 图标资源
-        var description: String,    // contentDescription / tooltipText
+        val iconRes: Int,           // 图标资源
+        val description: String,    // contentDescription / tooltipText
         val onClick: () -> Unit,    // 点击事件
         val onLongClick: (() -> Unit)? = null, // 可选长按
         val onCheck: (() -> Unit)? = null,// 可选

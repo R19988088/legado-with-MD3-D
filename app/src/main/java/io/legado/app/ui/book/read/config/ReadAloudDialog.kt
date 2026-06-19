@@ -4,19 +4,13 @@ package io.legado.app.ui.book.read.config
 //import io.legado.app.lib.theme.getPrimaryTextColor
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
-import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.slider.Slider
 import io.legado.app.R
 import io.legado.app.base.BaseBottomSheetDialogFragment
@@ -27,11 +21,11 @@ import io.legado.app.lib.dialogs.selector
 import io.legado.app.model.ReadAloud
 import io.legado.app.model.ReadBook
 import io.legado.app.service.BaseReadAloudService
-import io.legado.app.ui.book.read.ReaderBottomBarAction
-import io.legado.app.ui.book.read.ReaderFloatingBottomBar
+import io.legado.app.ui.book.read.ReadMenuBottomBarStyle
 import io.legado.app.ui.book.read.ReadBookActivity
-import io.legado.app.ui.book.read.captureBackdropBitmap
-import io.legado.app.ui.theme.AppTheme
+import io.legado.app.ui.config.themeConfig.ThemeConfig
+import io.legado.app.ui.widget.components.FloatingBottomBarConfig
+import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.observeEvent
 import io.legado.app.utils.themeColor
@@ -43,8 +37,6 @@ import io.legado.app.utils.visible
 class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud) {
     private val callBack: CallBack? get() = activity as? CallBack
     private val binding by viewBinding(DialogReadAloudBinding::bind)
-    private var actionBarReady = false
-    private var pendingPlayState = !BaseReadAloudService.pause
 
     override fun onStart() {
         super.onStart()
@@ -107,23 +99,37 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         initEvent()
     }
 
-    private fun initData() = binding.run {
-        actionBarCompose.setViewCompositionStrategy(
-            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+    private fun initPanelStyle() = binding.run {
+        rootView.setBackgroundColor(Color.TRANSPARENT)
+        val baseColor = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
+        val config = FloatingBottomBarConfig.resolve(
+            useFloatingBottomBar = ThemeConfig.useFloatingBottomBar,
+            useFloatingBottomBarLiquidGlass = ThemeConfig.useFloatingBottomBarLiquidGlass,
+            blurRadius = ThemeConfig.bottomBarBlurRadius,
+            blurAlpha = ThemeConfig.bottomBarBlurAlpha,
+            lensRadius = ThemeConfig.bottomBarLensRadius
         )
-        actionBarCompose.alpha = 0f
-        actionBarCompose.doOnLayout {
-            if (!actionBarReady) {
-                actionBarReady = true
-                actionBarCompose.post {
-                    renderActionBar(pendingPlayState)
-                    actionBarCompose.animate().alpha(1f).setDuration(80L).start()
-                    actionBarCompose.postDelayed({
-                        renderActionBar(pendingPlayState)
-                    }, 160L)
-                }
-            }
-        }
+        val style = ReadMenuBottomBarStyle.resolve(
+            config = config,
+            baseColor = baseColor,
+            menuAlpha = AppConfig.menuAlpha
+        )
+        applyPanelStyle(controlPanel, style)
+        applyPanelStyle(actionPanel, style)
+    }
+
+    private fun applyPanelStyle(
+        panel: MaterialCardView,
+        style: ReadMenuBottomBarStyle
+    ) {
+        panel.radius = style.cornerRadiusDp.dpToPx()
+        panel.cardElevation = style.elevationDp.dpToPx()
+        panel.strokeWidth = style.strokeWidthDp.dpToPx()
+        panel.strokeColor = style.strokeColor
+        panel.setCardBackgroundColor(style.backgroundColor)
+    }
+
+    private fun initData() = binding.run {
         upPlayState()
         upTimerText(BaseReadAloudService.timeMinute)
         cbTtsFollowSys.isChecked = requireContext().getPrefBoolean("ttsFollowSys", true)
@@ -149,8 +155,7 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
         ivPlayPrev.setOnClickListener { ReadAloud.prevParagraph(requireContext()) }
         ivPlayNext.setOnClickListener { ReadAloud.nextParagraph(requireContext()) }
         ivCatalog.setOnClickListener { callBack?.openChapterList() }
-        ivToBackstage.setOnClickListener { callBack?.onClickReadAloud() }
-        llToBackstage.setOnClickListener { callBack?.onClickReadAloud() }
+        ivToBackstage.setOnClickListener { callBack?.finish() }
         cbTtsFollowSys.setOnCheckedChangeListener { _, isChecked ->
             AppConfig.ttsFlowSys = isChecked
             upTtsSpeechRateEnabled(!isChecked)
@@ -225,16 +230,6 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
 
     }
 
-    private fun initPanelStyle() = binding.run {
-        val surface = requireContext().themeColor(com.google.android.material.R.attr.colorSurfaceContainer)
-        val controlColor = ColorUtils.setAlphaComponent(surface, 238)
-        rootView.setBackgroundColor(Color.TRANSPARENT)
-        controlPanel.setCardBackgroundColor(controlColor)
-        actionPanel.setCardBackgroundColor(Color.TRANSPARENT)
-        actionPanel.cardElevation = 0f
-        actionPanel.strokeWidth = 0
-    }
-
     private fun upTtsSpeechRateEnabled(enabled: Boolean) {
         binding.run {
             upTtsSpeechRateText(AppConfig.ttsSpeechRate)
@@ -246,88 +241,20 @@ class ReadAloudDialog : BaseBottomSheetDialogFragment(R.layout.dialog_read_aloud
     }
 
     private fun upPlayState() {
-        val isPlaying = !BaseReadAloudService.pause
-        pendingPlayState = isPlaying
         if (!BaseReadAloudService.pause) {
             binding.ivPlayPause.icon =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_pause)
             binding.ivPlayPause.contentDescription = getString(R.string.pause)
-            binding.ivPlayPause.tooltipText = getString(R.string.pause)
         } else {
             binding.ivPlayPause.icon =
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_play)
             binding.ivPlayPause.contentDescription = getString(R.string.audio_play)
-            binding.ivPlayPause.tooltipText = getString(R.string.audio_play)
-        }
-        binding.ivToBackstage.icon = ContextCompat.getDrawable(
-            requireContext(),
-            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-        )
-        binding.ivToBackstage.contentDescription = getString(
-            if (isPlaying) R.string.pause else R.string.audio_play
-        )
-        binding.ivToBackstage.tooltipText = binding.ivToBackstage.contentDescription
-        binding.tvToBackstage.text = getString(if (isPlaying) R.string.pause else R.string.audio_play)
-        binding.llToBackstage.contentDescription = binding.ivToBackstage.contentDescription
-        val tint = ColorStateList.valueOf(requireContext().themeColor(androidx.appcompat.R.attr.colorPrimary))
-        binding.ivToBackstage.iconTint = tint
-        if (actionBarReady) {
-            renderActionBar(isPlaying)
         }
 
         // val bg = requireContext().bottomBackground
         // val isLight = ColorUtils.isColorLight(bg)
         // val textColor = requireContext().getPrimaryTextColor(isLight)
         // binding.ivPlayPause.iconTint = ColorStateList.valueOf(textColor)
-    }
-
-    private fun renderActionBar(isPlaying: Boolean = !BaseReadAloudService.pause) {
-        val backdropImage = binding.actionBarCompose.captureBackdropBitmap()
-        val playPauseLabel = getString(if (isPlaying) R.string.pause else R.string.audio_play)
-        val actions = listOf(
-            ReaderBottomBarAction(
-                id = "catalog",
-                iconRes = R.drawable.ic_toc,
-                label = getString(R.string.chapter_list),
-                onClick = { callBack?.openChapterList() }
-            ),
-            ReaderBottomBarAction(
-                id = "main_menu",
-                iconRes = R.drawable.ic_menu,
-                label = getString(R.string.main_menu),
-                onClick = {
-                    callBack?.showMenuBar()
-                    dismissAllowingStateLoss()
-                }
-            ),
-            ReaderBottomBarAction(
-                id = "play_pause",
-                iconRes = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
-                label = playPauseLabel,
-                onClick = { callBack?.onClickReadAloud() }
-            ),
-            ReaderBottomBarAction(
-                id = "setting",
-                iconRes = R.drawable.ic_settings,
-                label = getString(R.string.setting),
-                onClick = { ReadAloudConfigDialog().show(childFragmentManager, "readAloudConfigDialog") }
-            )
-        )
-        binding.actionBarCompose.setContent {
-            AppTheme {
-                ReaderFloatingBottomBar(
-                    actions = actions,
-                    selectedIndex = 2,
-                    backdropImage = backdropImage,
-                    modifier = Modifier.padding(
-                        start = 0.dp,
-                        top = 4.dp,
-                        end = 0.dp,
-                        bottom = 8.dp
-                    )
-                )
-            }
-        }
     }
 
     private fun upSeekTimer() {
