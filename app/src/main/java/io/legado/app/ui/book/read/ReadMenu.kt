@@ -248,9 +248,9 @@ class ReadMenu @JvmOverloads constructor(
         seekReadPage.thumbTintList = ColorStateList.valueOf(acColor)
         seekReadPage.tickActiveTintList = ColorStateList.valueOf(bgColor)
         seekReadPage.tickInactiveTintList = ColorStateList.valueOf(acColor)
-        sliderPanel.setCardBackgroundColor(alphaBgColor)
-        sliderPanel.cardElevation = 6f.dpToPx()
-        sliderPanel.radius = 24f.dpToPx()
+        sliderPanel?.setCardBackgroundColor(alphaBgColor)
+        sliderPanel?.cardElevation = 6f.dpToPx()
+        sliderPanel?.radius = 24f.dpToPx()
         cdSlider.setCardBackgroundColor(ColorUtils.setAlphaComponent(bgcColor, (255 * 0.75f).toInt()))
         tvPre.iconTint = ColorStateList.valueOf(acColor)
         tvNext.iconTint = ColorStateList.valueOf(acColor)
@@ -537,7 +537,7 @@ class ReadMenu @JvmOverloads constructor(
         when (AppConfig.readSliderMode) {
             "0" -> {
                 binding.llSlider.gravity = Gravity.CENTER
-                binding.sliderPanel.isVisible = true
+                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = true
@@ -546,7 +546,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "1" -> {
                 binding.llSlider.gravity = Gravity.CENTER
-                binding.sliderPanel.isVisible = false
+                binding.sliderPanel?.isVisible = false
                 binding.llSlider.isVisible = false
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = false
@@ -555,7 +555,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "2" -> {
                 binding.llSlider.gravity = Gravity.START
-                binding.sliderPanel.isVisible = true
+                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = true
@@ -564,7 +564,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "3" -> {
                 binding.llSlider.gravity = Gravity.END
-                binding.sliderPanel.isVisible = true
+                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = false
                 binding.tvPre.isVisible = true
@@ -573,7 +573,7 @@ class ReadMenu @JvmOverloads constructor(
 
             "4" -> {
                 binding.llSlider.gravity = Gravity.CENTER
-                binding.sliderPanel.isVisible = true
+                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = false
@@ -581,7 +581,7 @@ class ReadMenu @JvmOverloads constructor(
             }
 
             else -> {
-                binding.sliderPanel.isVisible = true
+                binding.sliderPanel?.isVisible = true
                 binding.llSlider.isVisible = true
                 binding.cdSlider.isVisible = true
                 binding.tvPre.isVisible = true
