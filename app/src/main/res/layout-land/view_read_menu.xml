@@ -198,16 +198,18 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/bottom_view_card"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="520dp"
+                android:layout_height="88dp"
                 android:background="@android:color/transparent"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
                 <androidx.compose.ui.platform.ComposeView
                     android:id="@+id/bottom_view_compose"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="80dp" />
+                    android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
 
             <View

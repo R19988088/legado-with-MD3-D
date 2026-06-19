@@ -275,8 +275,6 @@ class ReadMenu @JvmOverloads constructor(
     private fun applyBottomBarStyle() = binding.run {
         val bottomViewCard = bottomViewCard ?: return@run
         (bottomViewCard.layoutParams as? ViewGroup.MarginLayoutParams)?.let { params ->
-            params.leftMargin = 0
-            params.rightMargin = 0
             params.bottomMargin = 0
             bottomViewCard.layoutParams = params
         }
@@ -613,10 +611,10 @@ class ReadMenu @JvmOverloads constructor(
                     actions = actions,
                     selectedIndex = selectedIndex,
                     modifier = Modifier.padding(
-                        start = 16.dp,
+                        start = 8.dp,
                         top = 4.dp,
-                        end = 16.dp,
-                        bottom = 12.dp
+                        end = 8.dp,
+                        bottom = 8.dp
                     )
                 )
             }

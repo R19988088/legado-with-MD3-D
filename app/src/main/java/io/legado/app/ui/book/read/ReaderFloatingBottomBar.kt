@@ -3,11 +3,14 @@ package io.legado.app.ui.book.read
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Badge
@@ -25,9 +28,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.capsule.ContinuousCapsule
 import io.legado.app.ui.config.themeConfig.ThemeConfig
+import io.legado.app.ui.theme.LegadoTheme
 import io.legado.app.ui.widget.components.FloatingBottomBar
 import io.legado.app.ui.widget.components.FloatingBottomBarConfig
 import io.legado.app.ui.widget.components.LocalFloatingBottomBarTabScale
@@ -61,19 +66,66 @@ fun ReaderFloatingBottomBar(
 ) {
     if (actions.isEmpty()) return
     val safeSelectedIndex = selectedIndex.coerceIn(actions.indices)
-    val backdrop = rememberLayerBackdrop()
-    FloatingBottomBar(
-        modifier = modifier,
-        selectedIndex = { safeSelectedIndex },
-        onSelected = { index -> actions.getOrNull(index)?.onClick?.invoke() },
-        backdrop = backdrop,
-        tabsCount = actions.size,
-        config = readerFloatingBottomBarConfig()
+    val surfaceColor = if (ThemeConfig.enableDeepPersonalization && ThemeConfig.secondaryThemeColor != 0) {
+        Color(ThemeConfig.secondaryThemeColor)
+    } else {
+        LegadoTheme.colorScheme.surface
+    }
+    val backdrop = rememberLayerBackdrop {
+        drawRect(surfaceColor)
+        drawContent()
+    }
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        actions.forEach { action ->
-            ReaderFloatingBottomBarItem(action = action, showLabel = showLabel)
+        Box(
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .layerBackdrop(backdrop)
+            )
+            FloatingBottomBar(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                selectedIndex = { safeSelectedIndex },
+                onSelected = {},
+                backdrop = backdrop,
+                tabsCount = actions.size,
+                config = readerFloatingBottomBarConfig()
+            ) {
+                actions.forEach { action ->
+                    ReaderFloatingBottomBarItem(action = action, showLabel = showLabel)
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(4.dp)
+            ) {
+                actions.forEach { action ->
+                    ReaderFloatingBottomBarHitTarget(action)
+                }
+            }
         }
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RowScope.ReaderFloatingBottomBarHitTarget(action: ReaderBottomBarAction) {
+    Box(
+        Modifier
+            .fillMaxHeight()
+            .weight(1f)
+            .clip(ContinuousCapsule)
+            .combinedClickable(
+                role = Role.Button,
+                onClick = action.onClick,
+                onLongClick = action.onLongClick
+            )
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -87,11 +139,6 @@ private fun RowScope.ReaderFloatingBottomBarItem(
         Modifier
             .defaultMinSize(minWidth = 64.dp)
             .clip(ContinuousCapsule)
-            .combinedClickable(
-                role = Role.Tab,
-                onClick = action.onClick,
-                onLongClick = action.onLongClick
-            )
             .fillMaxHeight()
             .weight(1f)
             .graphicsLayer {
