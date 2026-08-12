@@ -23,11 +23,18 @@ val versionProps = Properties().apply {
 }
 
 val versionMajor = versionProps["VERSION_MAJOR"]?.toString()?.toInt() ?: 0
-val versionMinor = versionProps["VERSION_MINOR"]?.toString()?.toInt() ?: 0
+val versionMinorText = versionProps["VERSION_MINOR"]?.toString() ?: "0"
+val versionMinor = versionMinorText.toInt()
 val versionPatch = versionProps["VERSION_PATCH"]?.toString()?.toIntOrNull() ?: 0
 val appName = "legado"
+val supportedAbis = setOf("armeabi-v7a", "arm64-v8a")
+val targetAbi = providers.gradleProperty("targetAbi").orNull
+require(targetAbi == null || targetAbi == "universal" || targetAbi in supportedAbis) {
+    "targetAbi must be one of ${supportedAbis.joinToString()}, universal, or omitted"
+}
+val splitAbis = targetAbi?.takeIf { it != "universal" }?.let(::setOf) ?: supportedAbis
 val projectVersionName = if (versionProps["VERSION_PATCH"]?.toString().isNullOrBlank()) {
-    "$versionMajor.${versionProps["VERSION_MINOR"]}"
+    "$versionMajor.$versionMinorText"
 } else {
     "$versionMajor.$versionMinor.$versionPatch"
 }
@@ -127,8 +134,8 @@ android {
         abi {
             isEnable = true
             reset()
-            include("armeabi-v7a", "arm64-v8a")
-            isUniversalApk = true
+            include(*splitAbis.toTypedArray())
+            isUniversalApk = targetAbi == null || targetAbi == "universal"
         }
     }
 

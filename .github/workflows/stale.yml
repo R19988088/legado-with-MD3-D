@@ -15,7 +15,7 @@ jobs:
   stale:
 
     runs-on: ubuntu-latest
-    if: ${{ github.repository == 'HapeLee/legado-with-MD3' }}
+    if: ${{ github.repository == 'R19988088/legado-with-MD3-D' }}
     permissions:
       issues: write
 

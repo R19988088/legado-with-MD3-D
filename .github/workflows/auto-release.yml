@@ -132,6 +132,7 @@ jobs:
         product: [ app ]
         # 如果是正式版，只构建 release；如果是测试版，构建 release 和 noR8
         type: ${{ (needs.prepare.outputs.is_release == 'true') && fromJSON('["release"]') || fromJSON('["release", "noR8"]') }}
+        abi: [armeabi-v7a, arm64-v8a, universal]
       fail-fast: false
     runs-on: ubuntu-latest
     env:
@@ -141,6 +142,7 @@ jobs:
       VERSION: ${{ needs.prepare.outputs.version }}
       VERSIONL: ${{ needs.prepare.outputs.versionL }}
       COMMIT_NUMBER_VAL: ${{ needs.prepare.outputs.commit_number }}
+      ABI: ${{ matrix.abi }}
 
     steps:
       - uses: actions/checkout@v5
@@ -174,19 +176,19 @@ jobs:
 
       - name: Build With Gradle
         run: |
-          echo "开始${{ env.product }}${{ env.type }}构建"
+          echo "开始${{ env.product }}${{ env.type }} (${{ env.ABI }}) 构建"
           echo "VersionName: $APP_VERSION_NAME"
           echo "VersionCode (Commit Number): $COMMIT_NUMBER"
           chmod +x gradlew
           # 将 type 首字母大写以匹配 Gradle Task
           TYPE_CAP=$(echo ${{ env.type }} | awk '{print toupper(substr($0,1,1))substr($0,2)}')
-          ./gradlew assemble${{ env.product }}${TYPE_CAP}
+          ./gradlew assemble${{ env.product }}${TYPE_CAP} -PtargetAbi=${{ env.ABI }}
         env:
           COMMIT_NUMBER: ${{ env.COMMIT_NUMBER_VAL }}
           APP_VERSION_NAME: ${{ env.VERSIONL }}
 
       - name: Move Missing Rules Files
-        if: matrix.type == 'release'
+        if: matrix.type == 'release' && matrix.abi == 'universal'
         run: |
           echo "移动missing_rules.txt文件"
           MAPPING_DIR="${{ github.workspace }}/mapping"
@@ -195,7 +197,7 @@ jobs:
           find ${{ github.workspace }}/app/build/outputs/mapping/ -name "missing_rules.txt" -exec mv {} "$MAPPING_DIR/missing_rules.txt" \;
 
       - name: Upload Missing Rules File To Artifact
-        if: matrix.type == 'release'
+        if: matrix.type == 'release' && matrix.abi == 'universal'
         uses: actions/upload-artifact@v4
         with:
           name: legado.${{ env.product }}.${{ env.type }}.mapping.missing_rules
@@ -206,13 +208,17 @@ jobs:
         run: |
           echo "检查 APK 输出目录"
           APK_PATH="$GITHUB_WORKSPACE/app/build/outputs/apk/${{ env.product }}/${{ env.type }}"
-          # 检查是否有任何 APK 文件生成
-          if [ -z "$(find "$APK_PATH" -name "*.apk" -print -quit)" ]; then
-            echo "Build production not found! Check gradle logs."
+          APK_PATTERN="*${{ env.ABI }}*.apk"
+          if [[ "${{ env.ABI }}" == "universal" ]]; then
+            APK_PATTERN="*universal*.apk"
+          fi
+          if [ -z "$(find "$APK_PATH" -name "$APK_PATTERN" -print -quit)" ]; then
+            echo "${{ env.ABI }} APK not found! Check gradle logs."
             exit 1
           fi
 
       - name: Upload universal APK
+        if: matrix.abi == 'universal'
         uses: actions/upload-artifact@v4
         with:
           name: universal-apk-${{ env.type }}
@@ -220,6 +226,7 @@ jobs:
           path: app/build/outputs/apk/${{ env.product }}/${{ env.type }}/*universal*.apk
 
       - name: Upload arm64-v8a APK
+        if: matrix.abi == 'arm64-v8a'
         uses: actions/upload-artifact@v4
         with:
           name: arm64-v8a-apk-${{ env.type }}
@@ -227,6 +234,7 @@ jobs:
           path: app/build/outputs/apk/${{ env.product }}/${{ env.type }}/*arm64-v8a*.apk
 
       - name: Upload armeabi-v7a APK
+        if: matrix.abi == 'armeabi-v7a'
         uses: actions/upload-artifact@v4
         with:
           name: armeabi-v7a-apk-${{ env.type }}
@@ -234,7 +242,7 @@ jobs:
           path: app/build/outputs/apk/${{ env.product }}/${{ env.type }}/*armeabi-v7a*.apk
 
       - name: Upload Mapping File To Artifact
-        if: matrix.type == 'release'
+        if: matrix.type == 'release' && matrix.abi == 'universal'
         uses: actions/upload-artifact@v4
         with:
           name: legado.${{ env.product }}.${{ env.type }}.mapping

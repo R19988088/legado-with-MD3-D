@@ -1,8 +1,8 @@
 # Legado with MD3
 
 <p align="left">
-  <a href="https://github.com/HapeLee/legado-with-MD3">简体中文</a> ｜ 
-  <a href="https://github.com/HapeLee/legado-with-MD3/blob/main/English.md">English</a>
+  <a href="https://github.com/R19988088/legado-with-MD3-D">简体中文</a> ｜
+  <a href="https://github.com/R19988088/legado-with-MD3-D/blob/main/English.md">English</a>
 </p>
 
 ---
@@ -109,4 +109,3 @@ support:
 
 This project is a **non-official fork** of Legado and is intended for learning,
 personal use, and experimentation only.
-

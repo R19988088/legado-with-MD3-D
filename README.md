@@ -1,8 +1,8 @@
 # Legado with MD3
 
 <p align="left">
-  <a href="https://github.com/HapeLee/legado-with-MD3">简体中文</a> ｜ 
-  <a href="https://github.com/HapeLee/legado-with-MD3/blob/main/English.md">English</a>
+  <a href="https://github.com/R19988088/legado-with-MD3-D">简体中文</a> ｜
+  <a href="https://github.com/R19988088/legado-with-MD3-D/blob/main/English.md">English</a>
 </p>
 
 ## 📖 介绍
@@ -65,4 +65,3 @@ Design 3 风格重构版本。
 ## ⚠️ 免责声明
 
 项目内容不代表原作者立场，与原项目作者不存在任何隶属或授权关系。
-

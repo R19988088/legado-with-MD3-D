@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  UPSTREAM_REPOSITORY: HapeLee/legado-with-MD3
+  UPSTREAM_REPOSITORY: R19988088/legado-with-MD3-D
 
 jobs:
   build:
@@ -62,4 +62,3 @@ jobs:
         with:
           commit_message: Bump web ${{ env.APP_VER}}
           file_pattern: app/src/main/assets/web/vue/
-
