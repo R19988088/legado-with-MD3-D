@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -169,6 +170,7 @@ private fun BookInfoScreenContent(
                 showMenu = showMenu,
                 onShowMenuChange = { showMenu = it },
                 onMenuAction = { onIntent(BookInfoIntent.MenuAction(it)) },
+                onGroupClick = { onIntent(BookInfoIntent.GroupClick) },
                 onBackPressed = onBack,
                 scrollBehavior = scrollBehavior,
             )
@@ -392,6 +394,7 @@ private fun BookInfoTransparentTopAppBar(
     showMenu: Boolean,
     onShowMenuChange: (Boolean) -> Unit,
     onMenuAction: (BookInfoMenuAction) -> Unit,
+    onGroupClick: () -> Unit,
     onBackPressed: () -> Unit,
     scrollBehavior: GlassTopAppBarScrollBehavior,
 ) {
@@ -423,6 +426,7 @@ private fun BookInfoTransparentTopAppBar(
                     showMenu = showMenu,
                     onShowMenuChange = onShowMenuChange,
                     onMenuAction = onMenuAction,
+                    onGroupClick = onGroupClick,
                 )
             },
             color = resolvedColor,
@@ -445,6 +449,7 @@ private fun BookInfoTransparentTopAppBar(
                             showMenu = showMenu,
                             onShowMenuChange = onShowMenuChange,
                             onMenuAction = onMenuAction,
+                            onGroupClick = onGroupClick,
                         )
                     }
                 }
@@ -486,6 +491,7 @@ private fun BookInfoTopBarActions(
     showMenu: Boolean,
     onShowMenuChange: (Boolean) -> Unit,
     onMenuAction: (BookInfoMenuAction) -> Unit,
+    onGroupClick: () -> Unit,
 ) {
     if (state.inBookshelf) {
         TopBarActionButton(
@@ -494,6 +500,11 @@ private fun BookInfoTopBarActions(
             contentDescription = "编辑"
         )
     }
+    TopBarActionButton(
+        onClick = onGroupClick,
+        imageVector = Icons.Default.Bookmarks,
+        contentDescription = stringResource(R.string.group_manage),
+    )
     TopBarActionButton(
         onClick = { onMenuAction(BookInfoMenuAction.Share) },
         imageVector = Icons.Default.Share,

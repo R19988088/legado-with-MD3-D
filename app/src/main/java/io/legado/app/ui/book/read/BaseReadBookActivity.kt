@@ -20,9 +20,9 @@ import io.legado.app.base.VMBaseActivity
 import io.legado.app.constant.AppConst.charsets
 import io.legado.app.constant.PreferKey
 import io.legado.app.databinding.ActivityBookReadBinding
-import io.legado.app.databinding.DialogDownloadChoiceBinding
 import io.legado.app.databinding.DialogEditTextBinding
 import io.legado.app.databinding.DialogSimulatedReadingBinding
+import io.legado.app.help.book.isLocal
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.config.ReadBookConfig
@@ -50,6 +50,8 @@ import io.legado.app.utils.setLightStatusBar
 import io.legado.app.utils.setNavigationBarColorAuto
 import io.legado.app.utils.setOnApplyWindowInsetsListenerCompat
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.themeColor
 import io.legado.app.utils.viewbindingdelegate.viewBinding
@@ -77,6 +79,7 @@ abstract class BaseReadBookActivity :
                 onBottomDialogChange()
             }
         }
+    private val downloadAllAdmissions = mutableSetOf<String>()
     private val selectBookFolderResult = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
             ReadBook.book?.let { book ->
@@ -289,29 +292,30 @@ abstract class BaseReadBookActivity :
         }
     }
 
-    @SuppressLint("InflateParams", "SetTextI18n")
-    fun showDownloadDialog() {
-        ReadBook.book?.let { book ->
-            alert(titleResource = R.string.offline_cache) {
-                val alertBinding = DialogDownloadChoiceBinding.inflate(layoutInflater).apply {
-                    editStart.setText((book.durChapterIndex + 1).toString())
-                    editEnd.setText(book.totalChapterNum.toString())
-                }
-                customView { alertBinding.root }
-                okButton {
-                    alertBinding.run {
-                        val start = editStart.text!!.toString().let {
-                            if (it.isEmpty()) 0 else it.toInt()
-                        }
-                        val end = editEnd.text!!.toString().let {
-                            if (it.isEmpty()) book.totalChapterNum else it.toInt()
-                        }
-                        lifecycleScope.launch {
-                            CacheBook.start(this@BaseReadBookActivity, book, start - 1, end - 1)
-                        }
+    fun startDownloadAll() {
+        val book = ReadBook.book ?: return
+        if (book.isLocal || book.totalChapterNum <= 0) return
+        if (!downloadAllAdmissions.add(book.bookUrl)) return
+        if (
+            CacheBook.cacheBookMap[book.bookUrl]?.hasQueuedDownloads() == true ||
+            CacheBook.pendingAdmissionFlow.value.containsKey(book.bookUrl)
+        ) {
+            downloadAllAdmissions.remove(book.bookUrl)
+            return
+        }
+        lifecycleScope.launch {
+            try {
+                CacheBook.start(this@BaseReadBookActivity, book, 0, book.totalChapterNum - 1)
+                withTimeoutOrNull(5_000) {
+                    while (
+                        CacheBook.cacheBookMap[book.bookUrl]?.hasQueuedDownloads() != true &&
+                        !CacheBook.pendingAdmissionFlow.value.containsKey(book.bookUrl)
+                    ) {
+                        delay(50)
                     }
                 }
-                cancelButton()
+            } finally {
+                downloadAllAdmissions.remove(book.bookUrl)
             }
         }
     }
